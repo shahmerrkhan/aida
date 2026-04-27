@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
+
+/* ===== THEME VARIABLES ===== */
+:root, [data-theme="warm"] {
+  --bg: #f5efe6;
+  --bg-secondary: #ece5d8;
+  --bg-card: #faf6f0;
+  --surface: #ffffff;
+  --border: #ddd4c4;
+  --border-soft: #e8e0d0;
+  --text-primary: #1a1510;
+  --text-secondary: #5c5040;
+  --text-muted: #9c8870;
+  --accent: #2c2c2c;
+  --accent-hover: #111111;
+  --accent-text: #f5efe6;
+  --highlight: #c4794a;
+  --highlight-soft: #f0ddd0;
+  --xp-bar: #c4794a;
+  --shadow: rgba(44, 28, 10, 0.10);
+  --shadow-hover: rgba(44, 28, 10, 0.18);
+  --logo-fill: #2c2c2c;
+  --logo-stroke: #f5efe6;
+  --grain-opacity: 0.04;
+}
+
+[data-theme="dark"] {
+  --bg: #141414;
+  --bg-secondary: #1c1c1c;
+  --bg-card: #1a1a1a;
+  --surface: #222222;
+  --border: #2e2e2e;
+  --border-soft: #282828;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --accent: #f0f0f0;
+  --accent-hover: #ffffff;
+  --accent-text: #141414;
+  --highlight: #e0a060;
+  --highlight-soft: #2a2010;
+  --xp-bar: #e0a060;
+  --shadow: rgba(0,0,0,0.4);
+  --shadow-hover: rgba(0,0,0,0.6);
+  --logo-fill: #f0f0f0;
+  --logo-stroke: #141414;
+  --grain-opacity: 0.06;
+}
+
+[data-theme="forest"] {
+  --bg: #1a2018;
+  --bg-secondary: #1f2a1d;
+  --bg-card: #1d2420;
+  --surface: #243028;
+  --border: #2e3d2c;
+  --border-soft: #283428;
+  --text-primary: #d8e8d0;
+  --text-secondary: #8aaa80;
+  --text-muted: #5a7054;
+  --accent: #a8d898;
+  --accent-hover: #c0e8b0;
+  --accent-text: #1a2018;
+  --highlight: #7ac870;
+  --highlight-soft: #1e3020;
+  --xp-bar: #7ac870;
+  --shadow: rgba(0,0,0,0.4);
+  --shadow-hover: rgba(0,0,0,0.6);
+  --logo-fill: #a8d898;
+  --logo-stroke: #1a2018;
+  --grain-opacity: 0.05;
+}
+
+[data-theme="midnight"] {
+  --bg: #0e1220;
+  --bg-secondary: #131828;
+  --bg-card: #111828;
+  --surface: #182035;
+  --border: #202a40;
+  --border-soft: #1a2438;
+  --text-primary: #dce4f8;
+  --text-secondary: #7888b8;
+  --text-muted: #4a5880;
+  --accent: #8899e8;
+  --accent-hover: #aabcff;
+  --accent-text: #0e1220;
+  --highlight: #6677dd;
+  --highlight-soft: #1a2050;
+  --xp-bar: #6677dd;
+  --shadow: rgba(0,0,0,0.5);
+  --shadow-hover: rgba(0,0,0,0.7);
+  --logo-fill: #8899e8;
+  --logo-stroke: #0e1220;
+  --grain-opacity: 0.05;
+}
+
+[data-theme="rose"] {
+  --bg: #1e1014;
+  --bg-secondary: #261418;
+  --bg-card: #221216;
+  --surface: #2e1820;
+  --border: #3e2028;
+  --border-soft: #341828;
+  --text-primary: #f0d8dc;
+  --text-secondary: #c07080;
+  --text-muted: #885060;
+  --accent: #f07080;
+  --accent-hover: #ff90a0;
+  --accent-text: #1e1014;
+  --highlight: #e05060;
+  --highlight-soft: #3a1820;
+  --xp-bar: #e05060;
+  --shadow: rgba(0,0,0,0.5);
+  --shadow-hover: rgba(0,0,0,0.7);
+  --logo-fill: #f07080;
+  --logo-stroke: #1e1014;
+  --grain-opacity: 0.05;
+}
+
+[data-theme="pink"] {
+  --bg: #fdf0f5;
+  --bg-secondary: #f8e8f0;
+  --bg-card: #fff5f8;
+  --surface: #ffffff;
+  --border: #e8c8d8;
+  --border-soft: #f0d8e8;
+  --text-primary: #2a1020;
+  --text-secondary: #804060;
+  --text-muted: #b07090;
+  --accent: #c8407a;
+  --accent-hover: #a03060;
+  --accent-text: #fdf0f5;
+  --highlight: #e05090;
+  --highlight-soft: #fce0ec;
+  --xp-bar: #e05090;
+  --shadow: rgba(80, 20, 50, 0.10);
+  --shadow-hover: rgba(80, 20, 50, 0.18);
+  --logo-fill: #c8407a;
+  --logo-stroke: #fdf0f5;
+  --grain-opacity: 0.03;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+html, body {
+  height: 100%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ===== TYPOGRAPHY ===== */
+h1, h2, h3 {
+  font-family: 'DM Serif Display', serif;
+  line-height: 1.2;
+}
+
+/* ===== UTILITY ===== */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ===== TRANSITIONS ===== */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+button, a, input, select, textarea {
+  transition: all 0.2s ease;
+}
