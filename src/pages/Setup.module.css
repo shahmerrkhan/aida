@@ -542,3 +542,14 @@
   .taskGrid { grid-template-columns: 1fr; }
   .uploadZone { padding: 20px 16px; }
 }
+
+select {
+  appearance: none;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+  cursor: pointer;
+}

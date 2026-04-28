@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import Logo from '../components/Logo';
 import ThemePicker from '../components/ThemePicker';
@@ -57,6 +57,15 @@ export default function Setup() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [fileParseError, setFileParseError] = useState('');
+  const location = useLocation();
+
+  useEffect(() => {
+  if (location.state?.preset) {
+    setPlatform(location.state.preset.platform);
+    setTask(location.state.preset.taskType);
+    setSubject(location.state.preset.subject);
+  }
+  }, [location.state?.preset]);
 
   async function handleFileUpload(e) {
     const file = e.target.files[0];

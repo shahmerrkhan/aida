@@ -4,6 +4,7 @@ import Landing from './pages/Landing';
 import Setup from './pages/Setup';
 import Result from './pages/Result';
 import Badges from './pages/Badges';
+import MyPrompts from './pages/MyPrompts';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/result" element={<Result />} />
           <Route path="/badges" element={<Badges />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/my-prompts" element={<MyPrompts />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

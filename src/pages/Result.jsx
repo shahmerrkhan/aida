@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import Logo from '../components/Logo';
 import ThemePicker from '../components/ThemePicker';
 import XPBar from '../components/XPBar';
 import { BADGES } from '../utils/achievements';
 import styles from './Result.module.css';
+import SavePromptModal from '../components/SavePromptModal';
+import { usePromptLibrary } from '../hooks/usePromptLibrary';
 
 const PLATFORM_EMOJIS = {
   chatgpt: '🤖',
@@ -52,6 +53,8 @@ export default function Result() {
 
   const [copied, setCopied] = useState(false);
   const [showXP, setShowXP] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const { addPrompt } = usePromptLibrary();
 
   useEffect(() => {
     if (!prompt) { navigate('/setup'); return; }
@@ -72,6 +75,14 @@ export default function Result() {
     });
   }
 
+  const handleSavePrompt = (promptData) => {
+    addPrompt({
+      ...promptData,
+      content: prompt,
+    });
+    setShowSaveModal(false);
+  };
+
   if (!prompt) return null;
 
   const platformEmoji = PLATFORM_EMOJIS[platform] || '🤖';
@@ -87,12 +98,12 @@ export default function Result() {
         <div className={styles.headerRight}>
           <XPBar xp={totalXP || 0} />
           <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
+          <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
           <ThemePicker />
         </div>
       </header>
 
       <main className={styles.main}>
-        {/* XP Toast */}
         {showXP && (
           <div className={`${styles.xpToast} ${showXP ? styles.xpVisible : ''}`}>
             <span className={styles.xpAmount}>+{xpFormatted} XP</span>
@@ -118,7 +129,6 @@ export default function Result() {
           </p>
         </div>
 
-        {/* Prompt Box */}
         <div className={styles.promptBox}>
           <div className={styles.promptHeader}>
             <span className={styles.promptLabel}>Generated Prompt</span>
@@ -127,13 +137,15 @@ export default function Result() {
           <pre className={styles.promptContent}>{prompt}</pre>
         </div>
 
-        {/* Action Buttons */}
         <div className={styles.actions}>
           <button
             className={`${styles.copyBtn} ${copied ? styles.copied : ''}`}
             onClick={handleCopy}
           >
             {copied ? '✓ Copied!' : '⎘ Copy Prompt'}
+          </button>
+          <button className={styles.saveBtn} onClick={() => setShowSaveModal(true)}>
+            🔖 Save Prompt
           </button>
           <button className={styles.openBtn} onClick={handleOpenInAI}>
             Open in {platformLabel} →
@@ -144,11 +156,21 @@ export default function Result() {
           "Open in {platformLabel}" copies the prompt to your clipboard and opens {platformLabel} in a new tab. Just paste when you get there.
         </p>
 
-        {/* Back */}
         <button className={styles.backLink} onClick={() => navigate('/setup')}>
           ← Build another prompt
         </button>
       </main>
+
+      <SavePromptModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={handleSavePrompt}
+        promptData={{
+          platform: platform,
+          taskType: task,
+          subject: subject,
+        }}
+      />
     </div>
   );
 }
