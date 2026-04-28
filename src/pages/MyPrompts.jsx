@@ -10,11 +10,11 @@ import CustomSelect from "./CustomSelect";
 
 export default function MyPrompts() {
   const navigate = useNavigate();
-  const { prompts, deletePrompt, incrementUsage } = usePromptLibrary();
+  const { prompts, deletePrompt, incrementUsage, promptHistory, clearHistory } = usePromptLibrary();
   const [search, setSearch] = useState('');
   const [filterPlatform, setFilterPlatform] = useState('');
   const [copiedId, setCopiedId] = useState(null);
-
+  const [copiedHistoryId, setCopiedHistoryId] = useState(null);
   const filteredPrompts = useMemo(() => {
     return prompts.filter((p) => {
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) {
@@ -30,12 +30,8 @@ export default function MyPrompts() {
   const platforms = [...new Set(prompts.map((p) => p.platform))].sort();
 
   const handleCopy = (prompt) => {
-    // Copy the actual prompt content from localStorage or clipboard
-    // For now, we'll copy a reference text
-    const text = `${prompt.name}\nPlatform: ${prompt.platform}\nTask: ${prompt.taskType}\nSubject: ${prompt.subject}`;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(prompt.content || '');
     incrementUsage(prompt.id);
-    
     setCopiedId(prompt.id);
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -44,6 +40,12 @@ export default function MyPrompts() {
     if (window.confirm('Delete this prompt?')) {
       deletePrompt(id);
     }
+  };
+
+  const handleCopyHistory = (entry) => {
+  navigator.clipboard.writeText(entry.content);
+  setCopiedHistoryId(entry.id);
+  setTimeout(() => setCopiedHistoryId(null), 2000);
   };
 
   const handleUseAgain = (prompt) => {
@@ -176,6 +178,59 @@ export default function MyPrompts() {
           </>
         )}
       </div>
+    {promptHistory.length > 0 && (
+        <div className={styles.container} style={{ marginTop: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div>
+              <h2 className={styles.title} style={{ fontSize: '1.25rem' }}>Recent</h2>
+              <p className={styles.subtitle}>Last {promptHistory.length} generated prompts</p>
+            </div>
+            <button
+              className={styles.deleteBtn}
+              onClick={() => { if (window.confirm('Clear all history?')) clearHistory(); }}
+              style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}
+            >
+              Clear
+            </button>
+          </div>
+          <div className={styles.grid}>
+            {promptHistory.map((entry) => (
+              <div key={entry.id} className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>{entry.subject || 'Untitled'}</h3>
+                  <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>
+                    {new Date(entry.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className={styles.cardMeta}>
+                  <div className={styles.metaBadge}>
+                    <span className={styles.badgeLabel}>Platform</span>
+                    <span className={styles.badgeValue}>{entry.platform}</span>
+                  </div>
+                  <div className={styles.metaBadge}>
+                    <span className={styles.badgeLabel}>Task</span>
+                    <span className={styles.badgeValue}>{entry.task}</span>
+                  </div>
+                </div>
+                <div className={styles.cardFooter}>
+                  <span className={styles.usageCount}>
+                    {entry.content?.length?.toLocaleString()} chars
+                  </span>
+                  <div className={styles.cardActions}>
+                    <button
+                      className={`${styles.actionBtn} ${copiedHistoryId === entry.id ? styles.copied : ''}`}
+                      onClick={() => handleCopyHistory(entry)}
+                      title="Copy prompt"
+                    >
+                      {copiedHistoryId === entry.id ? '✓' : '⎘'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   </div>
 )

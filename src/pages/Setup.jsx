@@ -8,6 +8,7 @@ import GeneratingAnimation from '../components/GeneratingAnimation';
 import { generatePromptWithGroq } from '../utils/groqApi';
 import { parseFile } from '../utils/fileParser';
 import { recordPrompt, getState } from '../utils/achievements';
+import { usePromptLibrary } from '../hooks/usePromptLibrary';
 import styles from './Setup.module.css';
 
 const PLATFORMS = [
@@ -37,7 +38,7 @@ export default function Setup() {
   const fileRef = useRef(null);
   const { theme } = useTheme();
   const state = getState();
-
+  const { presets, addPreset, deletePreset } = usePromptLibrary();
   const [platform, setPlatform] = useState('');
   const [task, setTask] = useState('');
   const [subject, setSubject] = useState('');
@@ -45,7 +46,9 @@ export default function Setup() {
   const [notesContent, setNotesContent] = useState('');
   const [notesFileName, setNotesFileName] = useState('');
   const [vibeLevel, setVibeLevel] = useState(50);
+  const [presetSaved, setPresetSaved] = useState(false);
   const [toggles, setToggles] = useState({
+    
     shortAnswers: false,
     dontRepeat: false,
     citeSource: false,
@@ -66,6 +69,10 @@ export default function Setup() {
     setSubject(location.state.preset.subject);
   }
   }, [location.state?.preset]);
+
+  useEffect(() => {
+  setPresetSaved(false);
+  }, [platform, task, subject]);
 
   async function handleFileUpload(e) {
     const file = e.target.files[0];
@@ -101,6 +108,12 @@ export default function Setup() {
     vibeLevel < 75 ? '😊 Casual' :
     '🔥 Full Chill Mode';
 
+   function handleSavePreset() {
+  if (!platform || !task || !subject.trim() || presetSaved) return;
+  addPreset({ platform, task, subject: subject.trim() });
+  setPresetSaved(true);
+  setTimeout(() => setPresetSaved(false), 2000);
+  }
   async function handleGenerate() {
     if (!platform) { setError('Pick an AI platform first.'); return; }
     if (!task) { setError('Choose what you need help with.'); return; }
@@ -154,14 +167,43 @@ export default function Setup() {
         <div className={styles.headerRight}>
           <XPBar xp={state.xp} />
           <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
-          <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
-          <ThemePicker />
+        <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
+        <ThemePicker />
         </div>
       </header>
 
       <main className={styles.main}>
         <h1 className={styles.title}>Set up your AI</h1>
         <p className={styles.subtitle}>Pick your platform, task, and subject. Aida handles the rest.</p>
+
+        {presets.length > 0 && (
+          <section className={styles.section} style={{ textAlign: 'center' }}>
+            <label className={styles.sectionLabel} style={{ textAlign: 'center' }}>⚡ Quick Presets</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>              {presets.map((preset) => (
+                <div key={preset.id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <button
+                    className={styles.presetBtn}
+                    onClick={() => {
+                        setPlatform(preset.platform);
+                        setTask(preset.task);
+                        setSubject(preset.subject);
+                    }}
+                  >
+                    <span className={styles.presetBtnLabel}>{preset.subject}</span>
+                    <span className={styles.presetBtnSub}>{preset.platform} · {preset.task}</span>
+                  </button>
+                  <button
+                    className={styles.presetDeleteBtn}
+                    onClick={() => deletePreset(preset.id)}
+                    title="Remove preset"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Platform */}
         <section className={styles.section}>
@@ -299,6 +341,17 @@ export default function Setup() {
             onChange={e => setCustomInstructions(e.target.value)}
           />
         </section>
+        
+        {platform && task && subject.trim() && (
+          <button
+            className={styles.savePresetBtn}
+            onClick={handleSavePreset}
+            disabled={presetSaved}
+            style={presetSaved ? { borderColor: 'var(--accent)', color: 'var(--accent)', borderStyle: 'solid' } : {}}
+          >
+            {presetSaved ? '✓ Preset saved!' : '⚡ Save as preset'}
+          </button>
+        )}
 
         {error && <p className={styles.error}>⚠ {error}</p>}
 

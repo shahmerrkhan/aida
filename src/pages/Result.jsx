@@ -54,13 +54,14 @@ export default function Result() {
   const [copied, setCopied] = useState(false);
   const [showXP, setShowXP] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const { addPrompt } = usePromptLibrary();
+  const { addPrompt, addToHistory } = usePromptLibrary();
 
   useEffect(() => {
-    if (!prompt) { navigate('/setup'); return; }
-    const t = setTimeout(() => setShowXP(true), 300);
-    return () => clearTimeout(t);
-  }, [prompt, navigate]);
+  if (!prompt) { navigate('/setup'); return; }
+  addToHistory({ content: prompt, platform, task, subject });
+  const t = setTimeout(() => setShowXP(true), 300);
+  return () => clearTimeout(t);
+}, [prompt, navigate]);
 
   function handleCopy() {
     navigator.clipboard.writeText(prompt).then(() => {
@@ -155,7 +156,7 @@ export default function Result() {
         <p className={styles.openHint}>
           "Open in {platformLabel}" copies the prompt to your clipboard and opens {platformLabel} in a new tab. Just paste when you get there.
         </p>
-        
+
         <button className={styles.backLink} onClick={() => navigate('/setup', {
           state: {
             preset: { platform, task, subject }

@@ -553,3 +553,70 @@ select {
   font-size: 15px;
   cursor: pointer;
 }
+
+.presetBtn {
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.presetBtn:hover {
+  border-color: var(--border);
+  box-shadow: 0 4px 12px var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.presetBtnLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.presetBtnSub {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.presetDeleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.4;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: opacity 0.2s;
+  padding: 2px 6px;
+}
+
+.presetDeleteBtn:hover {
+  opacity: 1;
+}
+
+.savePresetBtn {
+  padding: 10px 16px;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: block;
+  margin: 0 auto 1.5rem;
+}
+
+.savePresetBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--highlight-soft);
+}
