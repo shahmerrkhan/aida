@@ -137,33 +137,30 @@ export default function Result() {
           </div>
           <pre className={styles.promptContent}>{prompt}</pre>
         </div>
-
         <div className={styles.actions}>
-          <button
-            className={`${styles.copyBtn} ${copied ? styles.copied : ''}`}
-            onClick={handleCopy}
-          >
-            {copied ? '✓ Copied!' : '⎘ Copy Prompt'}
-          </button>
-          <button className={styles.saveBtn} onClick={() => setShowSaveModal(true)}>
-            🔖 Save Prompt
-          </button>
-          <button className={styles.openBtn} onClick={handleOpenInAI}>
-            Open in {platformLabel} →
-          </button>
-        </div>
+  <button
+    className={`${styles.copyBtn} ${copied ? styles.copied : ''}`}
+    onClick={handleCopy}
+  >
+    {copied ? '✓ Copied!' : '⎘ Copy Prompt'}
+  </button>
+  <button className={styles.saveBtn} onClick={() => setShowSaveModal(true)}>
+    🔖 Save Prompt
+  </button>
+  <button className={styles.openBtn} onClick={handleOpenInAI}>
+    Open in {platformLabel} →
+  </button>
+  <button className={styles.copyBtn} onClick={() => navigate('/setup', {
+    state: { preset: { platform, task, subject } }
+  })}>
+    ↺ Use this setup again
+  </button>
+</div>
 
         <p className={styles.openHint}>
           "Open in {platformLabel}" copies the prompt to your clipboard and opens {platformLabel} in a new tab. Just paste when you get there.
         </p>
 
-        <button className={styles.backLink} onClick={() => navigate('/setup', {
-          state: {
-            preset: { platform, task, subject }
-          }
-        })}>
-          ↺ Use this setup again
-        </button>
       </main>
 
       <SavePromptModal
