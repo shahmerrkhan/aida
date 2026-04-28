@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import Logo from '../components/Logo';
 import ThemePicker from '../components/ThemePicker';
@@ -47,6 +47,7 @@ export default function Setup() {
   const [notesFileName, setNotesFileName] = useState('');
   const [vibeLevel, setVibeLevel] = useState(50);
   const [presetSaved, setPresetSaved] = useState(false);
+  const [searchParams] = useSearchParams();
   const [toggles, setToggles] = useState({
     
     shortAnswers: false,
@@ -69,6 +70,15 @@ export default function Setup() {
     setSubject(location.state.preset.subject);
   }
   }, [location.state?.preset]);
+
+  useEffect(() => {
+  const p = searchParams.get('platform');
+  const t = searchParams.get('task');
+  const s = searchParams.get('subject');
+  if (p) setPlatform(p);
+  if (t) setTask(t);
+  if (s) setSubject(s);
+  }, []);
 
   useEffect(() => {
   setPresetSaved(false);

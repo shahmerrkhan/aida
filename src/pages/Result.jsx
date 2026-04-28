@@ -55,6 +55,8 @@ export default function Result() {
   const [showXP, setShowXP] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const { addPrompt, addToHistory } = usePromptLibrary();
+  const [shared, setShared] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
   if (!prompt) { navigate('/setup'); return; }
@@ -74,6 +76,55 @@ export default function Result() {
     navigator.clipboard.writeText(prompt).then(() => {
       window.open(PLATFORM_URLS[platform] || 'https://chat.openai.com', '_blank');
     });
+  }
+  function handleCopyLink() {
+  const params = new URLSearchParams({ platform, task, subject });
+  const url = `${window.location.origin}/setup?${params.toString()}`;
+  navigator.clipboard.writeText(url).then(() => {
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
+  });
+}
+
+function handleCopyPromptText() {
+  navigator.clipboard.writeText(prompt).then(() => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    setShowShare(false);
+  });
+}
+
+function handleShareEmail() {
+  const subject = encodeURIComponent('Check out this AI study prompt');
+  const body = encodeURIComponent(`I built this prompt using Aida:\n\n${prompt}\n\nTry it at: ${window.location.origin}`);
+  window.open(`mailto:?subject=${subject}&body=${body}`);
+}
+
+function handleShareWhatsApp() {
+  const params = new URLSearchParams({ platform, task, subject });
+  const url = `${window.location.origin}/setup?${params.toString()}`;
+  const text = encodeURIComponent(`Check out this AI study prompt I built on Aida: ${url}`);
+  window.open(`https://wa.me/?text=${text}`);
+}
+
+function handleShareTwitter() {
+  const params = new URLSearchParams({ platform, task, subject });
+  const url = `${window.location.origin}/setup?${params.toString()}`;
+  const text = encodeURIComponent(`Just built a fire study prompt on Aida ⚡`);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`);
+}
+
+  function handleShare() {
+  const params = new URLSearchParams({
+    platform: platform || '',
+    task: task || '',
+    subject: subject || '',
+  });
+  const url = `${window.location.origin}/setup?${params.toString()}`;
+  navigator.clipboard.writeText(url).then(() => {
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
+  });
   }
 
   const handleSavePrompt = (promptData) => {
@@ -155,7 +206,45 @@ export default function Result() {
   })}>
     ↺ Use this setup again
   </button>
+  <button className={styles.copyBtn} onClick={() => setShowShare(true)}>
+    🔗 Share
+  </button>
 </div>
+
+{showShare && (
+  <div className={styles.shareOverlay} onClick={() => setShowShare(false)}>
+    <div className={styles.shareCard} onClick={e => e.stopPropagation()}>
+      <div className={styles.shareCardHeader}>
+        <h3 className={styles.shareCardTitle}>Share this prompt</h3>
+        <button className={styles.shareCloseBtn} onClick={() => setShowShare(false)}>×</button>
+      </div>
+      <div className={styles.shareOptions}>
+        <button className={styles.shareOption} onClick={handleCopyLink}>
+          <span className={styles.shareOptionIcon}>🔗</span>
+          <span>{shared ? '✓ Copied!' : 'Copy link'}</span>
+        </button>
+        <button className={styles.shareOption} onClick={handleCopyPromptText}>
+          <span className={styles.shareOptionIcon}>⎘</span>
+          <span>Copy prompt text</span>
+        </button>
+        <button className={styles.shareOption} onClick={handleShareWhatsApp}>
+          <span className={styles.shareOptionIcon}>💬</span>
+          <span>WhatsApp</span>
+        </button>
+        <button className={styles.shareOption} onClick={handleShareEmail}>
+          <span className={styles.shareOptionIcon}>✉️</span>
+          <span>Email</span>
+        </button>
+        <button className={styles.shareOption} onClick={handleShareTwitter}>
+          <span className={styles.shareOptionIcon}>𝕏</span>
+          <span>Twitter / X</span>
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
         <p className={styles.openHint}>
           "Open in {platformLabel}" copies the prompt to your clipboard and opens {platformLabel} in a new tab. Just paste when you get there.
