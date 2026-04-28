@@ -155,9 +155,13 @@ export default function Result() {
         <p className={styles.openHint}>
           "Open in {platformLabel}" copies the prompt to your clipboard and opens {platformLabel} in a new tab. Just paste when you get there.
         </p>
-
-        <button className={styles.backLink} onClick={() => navigate('/setup')}>
-          ← Build another prompt
+        
+        <button className={styles.backLink} onClick={() => navigate('/setup', {
+          state: {
+            preset: { platform, task, subject }
+          }
+        })}>
+          ↺ Use this setup again
         </button>
       </main>
 

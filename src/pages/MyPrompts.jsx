@@ -159,20 +159,13 @@ export default function MyPrompts() {
                       </span>
                       <div className={styles.cardActions}>
                         <button
-                          className={styles.actionBtn}
-                          onClick={() => handleUseAgain(prompt)}
-                          title="Use this prompt again"
-                        >
-                          ↻
-                        </button>
-                        <button
                           className={`${styles.actionBtn} ${
                             copiedId === prompt.id ? styles.copied : ''
-                          }`}
-                          onClick={() => handleCopy(prompt)}
-                          title="Copy to clipboard"
-                        >
-                          {copiedId === prompt.id ? '✓' : '⎘'}
+                        }`}
+                        onClick={() => handleCopy(prompt)}
+                        title="Copy to clipboard"
+                      >
+                        {copiedId === prompt.id ? '✓' : '⎘'}
                         </button>
                       </div>
                     </div>

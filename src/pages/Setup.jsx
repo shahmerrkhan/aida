@@ -154,6 +154,7 @@ export default function Setup() {
         <div className={styles.headerRight}>
           <XPBar xp={state.xp} />
           <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
+          <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
           <ThemePicker />
         </div>
       </header>
