@@ -2,7 +2,8 @@ import * as mammoth from 'mammoth';
 import * as pdfjs from 'pdfjs-dist';
 
 // Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+import workerSrc from 'pdfjs-dist/build/pdf.worker?url';
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 /**
  * Parse various file types and extract text
@@ -85,20 +86,20 @@ async function parseDocx(file) {
 }
 
 async function parsePptx(file) {
-  // PPTX is a zip file, so we'll do a basic extraction using JSZip if available
-  // For now, we'll read it as text and extract what we can
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        // PPTX files contain XML, we can do basic text extraction
         const arrayBuffer = e.target.result;
         const view = new Uint8Array(arrayBuffer);
-        // Convert to string for basic XML parsing
-        let text = String.fromCharCode.apply(null, view);
-        // Remove XML tags and extract text
-        text = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-        resolve(text.trim() || 'PPTX file parsed but contains limited extractable text');
+        let text = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < view.length; i += chunkSize) {
+          const chunk = view.subarray(i, i + chunkSize);
+          text += String.fromCharCode(...chunk);
+        }
+        text = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        resolve(text || 'PPTX file parsed but contains limited extractable text');
       } catch (err) {
         reject(new Error('Failed to parse PPTX: ' + err.message));
       }

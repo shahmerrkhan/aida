@@ -85,21 +85,21 @@ export default function Setup() {
   }, [platform, task, subject]);
 
   async function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setFileParseError('');
-    setIsLoading(true);
-    try {
-      const content = await parseFile(file);
-      setNotesContent(content);
-      setNotesFileName(file.name);
-    } catch (err) {
-      setFileParseError(`Failed to parse file: ${err.message}`);
-      if (fileRef.current) fileRef.current.value = '';
-    } finally {
-      setIsLoading(false);
-    }
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  setFileParseError('');
+  setIsLoading(true);
+  try {
+    const contents = await Promise.all(files.map(f => parseFile(f)));
+    setNotesContent(contents.join('\n\n---\n\n'));
+    setNotesFileName(files.length === 1 ? files[0].name : `${files.length} files`);
+  } catch (err) {
+    setFileParseError(`Failed to parse file: ${err.message}`);
+    if (fileRef.current) fileRef.current.value = '';
+  } finally {
+    setIsLoading(false);
   }
+}
 
   function removeFile() {
     setNotesContent('');
@@ -332,6 +332,7 @@ export default function Setup() {
                 className={styles.hiddenInput}
                 onChange={handleFileUpload}
                 disabled={isLoading}
+                multiple
               />
               <span className={styles.uploadIcon}>{isLoading ? '⏳' : '📄'}</span>
               <span className={styles.uploadText}>{isLoading ? 'Parsing...' : 'Drop a file or click'}</span>
