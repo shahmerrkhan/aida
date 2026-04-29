@@ -16,7 +16,9 @@ export async function generatePromptWithGroq({
   fileContent,
   toggles,
   customInstructions,
-}) {
+  promptMode = 'detailed',
+})
+{
   if (!GROQ_API_KEY) throw new Error('NO_KEY');
 
   const vibeDescription =
@@ -71,34 +73,50 @@ export async function generatePromptWithGroq({
   const platformContext = platformNotes[platform] || platform;
   const taskContext = taskInstructions[task] || task;
 
-  const metaPrompt = `You are a world-class prompt engineer creating a detailed system prompt for an AI study assistant. A student will paste your output directly into ${platformContext}.
+const metaPrompt = promptMode === 'quick'
+  ? `You are a prompt engineer. Create a SHORT, focused system prompt for an AI study assistant.
 
-OUTPUT RULES — critical:
-- Output ONLY the raw system prompt text. Nothing else.
-- No preamble like "Here is your prompt:" 
-- No markdown code fences (no triple backticks)
-- No explanation after the prompt
-- Start immediately with "You are..."
+    OUTPUT RULES:
+    - Output ONLY the raw system prompt text, nothing else
+    - No preamble, no code fences, no explanation
+    - Start with "You are..."
+    - Maximum 150 words — be concise and direct
 
-STUDENT'S REQUIREMENTS:
-Platform: ${platformContext}
-Task: The AI must specialise in ${taskContext}
-Subject: ${subject}${topic ? `\nSpecific topic (go deep on this): ${topic}` : ""}
-Tone: ${vibeDescription}
-${toggleLines ? `\nNon-negotiable behaviour rules:\n${toggleLines}` : ""}${notesSection}${customSection}
+    STUDENT'S REQUIREMENTS:
+    Platform: ${platformContext}
+    Task: ${taskContext}
+    Subject: ${subject}${topic ? `\nTopic: ${topic}` : ''}
+    Tone: ${vibeDescription}
+    ${toggleLines ? `Rules:\n${toggleLines}` : ''}${notesSection}${customSection}
 
-WHAT THE SYSTEM PROMPT MUST CONTAIN (all of these, in order):
-1. A strong "You are..." opening that establishes a specific, vivid AI persona purpose-built for this exact student, subject, and task — NOT a generic tutor
-2. A clear explanation of the AI's primary job and how it should approach this specific subject area
-3. Subject-specific expertise section: key frameworks, common student misconceptions to actively watch for and correct, what mastery looks like in ${subject}
-4. Explicit tone and communication style with 2-3 examples of what that sounds like in practice (show, don't just tell)
-5. All behaviour rules listed clearly with no ambiguity
-6. How to handle situations where the student is stuck, confused, or getting something wrong
-7. A warm, on-brand opening message the AI will use to greet the student — written in the correct tone, referencing the subject
-8. The prompt must be at least 450 words — thorough enough that the AI has zero ambiguity
+    Write a tight, punchy system prompt that gets straight to the point. No fluff.`
+      : `You are a world-class prompt engineer creating a detailed system prompt for an AI study assistant. A student will paste your output directly into ${platformContext}.
 
-Write entirely in second person ("You are...", "You will...", "Your job is..."). Make it feel hand-crafted for THIS student, not templated.`;
+    OUTPUT RULES — critical:
+    - Output ONLY the raw system prompt text. Nothing else.
+    - No preamble like "Here is your prompt:" 
+    - No markdown code fences (no triple backticks)
+    - No explanation after the prompt
+    - Start immediately with "You are..."
 
+    STUDENT'S REQUIREMENTS:
+    Platform: ${platformContext}
+    Task: The AI must specialise in ${taskContext}
+    Subject: ${subject}${topic ? `\nSpecific topic (go deep on this): ${topic}` : ""}
+    Tone: ${vibeDescription}
+    ${toggleLines ? `\nNon-negotiable behaviour rules:\n${toggleLines}` : ""}${notesSection}${customSection}
+
+    WHAT THE SYSTEM PROMPT MUST CONTAIN (all of these, in order):
+    1. A strong "You are..." opening that establishes a specific, vivid AI persona purpose-built for this exact student, subject, and task — NOT a generic tutor
+    2. A clear explanation of the AI's primary job and how it should approach this specific subject area
+    3. Subject-specific expertise section: key frameworks, common student misconceptions to actively watch for and correct, what mastery looks like in ${subject}
+    4. Explicit tone and communication style with 2-3 examples of what that sounds like in practice (show, don't just tell)
+    5. All behaviour rules listed clearly with no ambiguity
+    6. How to handle situations where the student is stuck, confused, or getting something wrong
+    7. A warm, on-brand opening message the AI will use to greet the student — written in the correct tone, referencing the subject
+    8. The prompt must be at least 450 words — thorough enough that the AI has zero ambiguity
+
+    Write entirely in second person ("You are...", "You will...", "Your job is..."). Make it feel hand-crafted for THIS student, not templated.`;
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {

@@ -48,6 +48,7 @@ export default function Setup() {
   const [vibeLevel, setVibeLevel] = useState(50);
   const [presetSaved, setPresetSaved] = useState(false);
   const [searchParams] = useSearchParams();
+  const [promptMode, setPromptMode] = useState('detailed');
   const [toggles, setToggles] = useState({
     
     shortAnswers: false,
@@ -141,8 +142,8 @@ export default function Setup() {
         fileContent: notesContent,
         toggles,
         customInstructions: customInstructions.trim(),
+        promptMode,
       });
-
       const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
 
       navigate('/result', {
@@ -354,6 +355,28 @@ export default function Setup() {
             value={customInstructions}
             onChange={e => setCustomInstructions(e.target.value)}
           />
+        </section>
+
+        <section className={styles.section}>
+          <label className={styles.sectionLabel}>08 — Prompt Style</label>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              className={`${styles.taskCard} ${promptMode === 'quick' ? styles.taskCardActive : ''}`}
+              onClick={() => setPromptMode('quick')}
+              style={{ flex: 1 }}
+            >
+              <span className={styles.taskIcon}>⚡</span>
+              <span className={styles.taskLabel}>Quick</span>
+            </button>
+            <button
+              className={`${styles.taskCard} ${promptMode === 'detailed' ? styles.taskCardActive : ''}`}
+              onClick={() => setPromptMode('detailed')}
+              style={{ flex: 1 }}
+            >
+              <span className={styles.taskIcon}>📋</span>
+              <span className={styles.taskLabel}>Detailed</span>
+            </button>
+          </div>
         </section>
         
         {platform && task && subject.trim() && (
