@@ -46,6 +46,19 @@ const PLATFORM_URLS = {
   poe: 'https://poe.com',
 };
 
+const PLATFORM_TIPS = {
+  chatgpt: "Paste this as your first message in a new chat. For best results, start a fresh conversation — don't add it to an existing one.",
+  gemini: "Paste this at the start of a new Gemini chat. If you're using Gemini Advanced, it'll handle the length better.",
+  claude: "Claude works best with this in a new Project. Go to Projects → New Project → paste this as the system prompt for a persistent setup.",
+  copilot: "Use this in Copilot's chat interface. For school work, try Microsoft Edge's built-in Copilot sidebar for quick access.",
+  perplexity: "Paste this at the start of your Perplexity thread. It works best in Focus mode — turn off web search if you want pure reasoning.",
+  grok: "Paste this as your opening message on grok.x.com. Grok handles casual tone really well so crank the vibe slider next time.",
+  mistral: "Use Le Chat at chat.mistral.ai. Mistral is especially strong at structured reasoning so this works great for STEM.",
+  meta: "Paste this on meta.ai. Meta AI works well for conversational back-and-forth so ask follow-up questions freely.",
+  deepseek: "Paste this on chat.deepseek.com. For math and science, DeepSeek R1 is the model to pick — it shows full working.",
+  poe: "On Poe, you can save this as a custom bot prompt so you don't have to paste it every time. Try the Bot Creator.",
+};
+
 export default function Result() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -193,6 +206,12 @@ function handleShareTwitter() {
           </div>
           <pre className={styles.promptContent}>{prompt}</pre>
         </div>
+        {PLATFORM_TIPS[platform] && (
+          <div className={styles.tipCard}>
+            <span className={styles.tipIcon}>💡</span>
+            <p className={styles.tipText}>{PLATFORM_TIPS[platform]}</p>
+          </div>
+        )}
         <div className={styles.actions}>
   <button
     className={`${styles.copyBtn} ${copied ? styles.copied : ''}`}
