@@ -285,23 +285,30 @@
 .toggleItem {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 12px;
   cursor: pointer;
-  padding: 12px;
-  border-radius: 10px;
   transition: all 0.2s ease;
+  user-select: none;
   position: relative;
 }
 
 .toggleItem:hover {
+  border-color: var(--border);
+  box-shadow: 0 4px 12px var(--shadow-hover);
+  transform: translateY(-2px);
   background: var(--bg-secondary);
 }
 
 .toggleItem input {
+  position: absolute;
   width: 0;
   height: 0;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none;
 }
 
 .toggleItem input + span {
@@ -335,11 +342,15 @@
 .toggleItem input:checked + span::after {
   content: '✓';
   position: absolute;
-  left: 14px;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--accent-text);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: bold;
-  line-height: 20px;
+  line-height: 1;
+  width: 20px;
+  text-align: center;
 }
 
 .toggleItem:hover input + span::before {
@@ -636,4 +647,62 @@ select {
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-10px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+.customConfirmBox {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--highlight-soft);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+}
+
+.customConfirmText {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0 0 10px 0;
+  font-weight: 500;
+}
+
+.customConfirmButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.confirmBtn {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.confirmBtn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.confirmBtnSecondary {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.confirmBtnSecondary:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
 }

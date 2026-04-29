@@ -50,6 +50,9 @@ export default function Setup() {
   const [presetSaved, setPresetSaved] = useState(false);
   const [searchParams] = useSearchParams();
   const [promptMode, setPromptMode] = useState('detailed');
+  const [showCustomConfirm, setShowCustomConfirm] = useState(false);
+  const [customInstructionsInput, setCustomInstructionsInput] = useState('');
+  const [customMode, setCustomMode] = useState('rephrase');
   const [toggles, setToggles] = useState({
     
     shortAnswers: false,
@@ -104,8 +107,16 @@ export default function Setup() {
   setIsLoading(true);
   try {
     const contents = await Promise.all(files.map(f => parseFile(f)));
-    setNotesContent(contents.join('\n\n---\n\n'));
-    setNotesFileName(files.length === 1 ? files[0].name : `${files.length} files`);
+    const newContent = notesContent 
+      ? notesContent + '\n\n---\n\n' + contents.join('\n\n---\n\n')
+      : contents.join('\n\n---\n\n');
+    setNotesContent(newContent);
+    setNotesFileName(
+      notesFileName 
+        ? `${notesFileName} + ${files.length} more file${files.length > 1 ? 's' : ''}`
+        : files.length === 1 ? files[0].name : `${files.length} files`
+    );
+    if (fileRef.current) fileRef.current.value = '';
   } catch (err) {
     setFileParseError(`Failed to parse file: ${err.message}`);
     if (fileRef.current) fileRef.current.value = '';
@@ -115,11 +126,13 @@ export default function Setup() {
 }
 
   function removeFile() {
-    setNotesContent('');
-    setNotesFileName('');
-    setFileParseError('');
-    if (fileRef.current) fileRef.current.value = '';
+  setNotesFileName('');
+  setNotesContent('');
+  setFileParseError('');
+  if (fileRef.current) {
+    fileRef.current.value = '';
   }
+}
 
   function toggleItem(key) {
     setToggles(prev => ({ ...prev, [key]: !prev[key] }));
@@ -146,16 +159,17 @@ export default function Setup() {
 
     try {
       const generatedPrompt = await generatePromptWithGroq({
-        platform,
-        task,
-        subject: subject.trim(),
-        topic: topic.trim(),
-        vibeLevel,
-        fileContent: notesContent,
-        toggles,
-        customInstructions: customInstructions.trim(),
-        promptMode,
-      });
+      platform,
+      task,
+      subject: subject.trim(),
+      topic: topic.trim(),
+      vibeLevel,
+      fileContent: notesContent,
+      toggles,
+      customInstructions: customInstructions.trim(),
+      promptMode,
+      customMode,
+    });
       const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
 
       navigate('/result', {
@@ -353,28 +367,39 @@ export default function Setup() {
             </div>
           )}
 
-          {notesFileName ? (
+          {notesFileName && (
             <div className={styles.fileLoaded}>
               <span className={styles.fileIcon}>📎</span>
               <span className={styles.fileName}>{notesFileName}</span>
-              <button className={styles.removeFile} onClick={removeFile}>✕ Remove</button>
-            </div>
-          ) : (
-            <div className={styles.uploadZone} onClick={() => fileRef.current?.click()}>
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".txt,.md,.pdf,.docx,.pptx,.csv,.json,.rtf"
-                className={styles.hiddenInput}
-                onChange={handleFileUpload}
-                disabled={isLoading}
-                multiple
-              />
-              <span className={styles.uploadIcon}>{isLoading ? '⏳' : '📄'}</span>
-              <span className={styles.uploadText}>{isLoading ? 'Parsing...' : 'Drop a file or click'}</span>
-              <span className={styles.uploadSub}>PDF, Word, PPTX, notes, etc.</span>
+              <button 
+                className={styles.removeFile} 
+                onClick={() => {
+                  setNotesFileName('');
+                  setNotesContent('');
+                  setFileParseError('');
+                  if (fileRef.current) fileRef.current.value = '';
+                }}
+              >
+                ✕ Remove
+              </button>
             </div>
           )}
+
+          <div className={styles.uploadZone} style={{ marginTop: notesFileName ? '12px' : '0' }} onClick={() => fileRef.current?.click()}>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".txt,.md,.pdf,.docx,.pptx,.csv,.json,.rtf"
+              className={styles.hiddenInput}
+              onChange={handleFileUpload}
+              disabled={isLoading}
+              multiple
+            />
+            <span className={styles.uploadIcon}>{isLoading ? '⏳' : '📄'}</span>
+            <span className={styles.uploadText}>{isLoading ? 'Parsing...' : notesFileName ? 'Add more files' : 'Drop a file or click'}</span>
+            <span className={styles.uploadSub}>PDF, Word, PPTX, notes, etc.</span>
+          </div>
+
           {fileParseError && <p className={styles.fileError}>⚠ {fileParseError}</p>}
         </section>
 
@@ -383,32 +408,29 @@ export default function Setup() {
           <label className={styles.sectionLabel}>07 — Anything else? (optional)</label>
           <textarea
             className={styles.textarea}
-            placeholder="e.g. I'm a visual learner, always use analogies. I struggle with integration by parts specifically. My exam is in 3 days and I need to know the most likely topics..."
+            placeholder="e.g. I'm a visual learner, always use analogies. I struggle with integration by parts specifically..."
             value={customInstructions}
             onChange={e => setCustomInstructions(e.target.value)}
           />
-        </section>
-
-        <section className={styles.section}>
-          <label className={styles.sectionLabel}>08 — Prompt Style</label>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button
-              className={`${styles.taskCard} ${promptMode === 'quick' ? styles.taskCardActive : ''}`}
-              onClick={() => setPromptMode('quick')}
-              style={{ flex: 1 }}
-            >
-              <span className={styles.taskIcon}>⚡</span>
-              <span className={styles.taskLabel}>Quick</span>
-            </button>
-            <button
-              className={`${styles.taskCard} ${promptMode === 'detailed' ? styles.taskCardActive : ''}`}
-              onClick={() => setPromptMode('detailed')}
-              style={{ flex: 1 }}
-            >
-              <span className={styles.taskIcon}>📋</span>
-              <span className={styles.taskLabel}>Detailed</span>
-            </button>
-          </div>
+          {customInstructions.trim() && (
+            <div className={styles.customConfirmBox}>
+              <p className={styles.customConfirmText}>How should Aida handle these instructions?</p>
+              <div className={styles.customConfirmButtons}>
+                <button
+                  className={customMode === 'rephrase' ? styles.confirmBtn : styles.confirmBtnSecondary}
+                  onClick={() => setCustomMode('rephrase')}
+                >
+                  Rephrase & embed
+                </button>
+                <button
+                  className={customMode === 'addEnd' ? styles.confirmBtn : styles.confirmBtnSecondary}
+                  onClick={() => setCustomMode('addEnd')}
+                >
+                  Add at end
+                </button>
+              </div>
+            </div>
+          )}
         </section>
         
         {platform && task && subject.trim() && (

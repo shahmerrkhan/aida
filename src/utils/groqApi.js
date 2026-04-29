@@ -17,6 +17,7 @@ export async function generatePromptWithGroq({
   toggles,
   customInstructions,
   promptMode = 'detailed',
+  customMode = 'rephrase',
 })
 {
   if (!GROQ_API_KEY) throw new Error('NO_KEY');
@@ -67,9 +68,9 @@ export async function generatePromptWithGroq({
     ? `\n\nThe student has uploaded their personal study notes and materials. These are your PRIMARY reference — quote from them, connect your explanations directly to them, and treat them as ground truth for this session:\n"""\n${fileContent.slice(0, 6000)}\n"""`
     : "";
 
-  const customSection = customInstructions
-    ? `\n\nHigh-priority personal instructions from the student (always follow these):\n${customInstructions}`
-    : "";
+ const customSection = customInstructions && customMode !== 'addEnd'
+  ? `\n\nHigh-priority personal instructions from the student — rephrase these naturally and embed them throughout the prompt where relevant:\n${customInstructions}`
+  : "";
 
   const platformContext = platformNotes[platform] || platform;
   const taskContext = taskInstructions[task] || task;
@@ -156,7 +157,12 @@ const metaPrompt = promptMode === 'quick'
   }
 
   const data = await response.json();
-  const generatedPrompt = data.choices[0]?.message?.content?.trim();
+  let generatedPrompt = data.choices[0]?.message?.content?.trim();
   if (!generatedPrompt) throw new Error('No prompt generated');
+
+  if (customMode === 'addEnd' && customInstructions) {
+    generatedPrompt = generatedPrompt + '\n\n---\n\n' + customInstructions.trim();
+  }
+
   return generatedPrompt;
 }

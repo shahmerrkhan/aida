@@ -24,14 +24,16 @@ export default function Logo({ size = 'md' }) {
           r={s.circle / 2 - 1.5}
           fill="var(--logo-fill)"
         />
-        <polyline
-          points={s.pulse}
+
+        <path
+          d={s.pulse}
           fill="none"
           stroke="var(--logo-stroke)"
           strokeWidth={size === 'sm' ? 1.5 : 2}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+        
       </svg>
       <span className={styles.wordmark}>aida</span>
     </div>

@@ -129,8 +129,9 @@
 .statsRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 36px;
+  gap: 20px;
+  margin-bottom: 40px;
+  margin-top: 10px;
 }
 
 .statCard {
@@ -166,13 +167,14 @@
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: 14px;
+  margin-top: 20px;
 }
 
 /* ===== BADGE GRID ===== */
 .badgeGrid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .badgeCard {
