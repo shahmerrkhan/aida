@@ -314,3 +314,22 @@
   .ctaPrimary { width: 100%; justify-content: center; }
   .featuresSection { grid-template-columns: 1fr; }
 }
+
+.ctaSecondary {
+  padding: 10px 24px;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ctaSecondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--highlight-soft);
+}

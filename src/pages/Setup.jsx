@@ -9,6 +9,7 @@ import { generatePromptWithGroq } from '../utils/groqApi';
 import { parseFile } from '../utils/fileParser';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
 import { recordPrompt, getState, getCurrentLevel } from '../utils/achievements';
+import { useAuth } from '../context/AuthContext';
 import styles from './Setup.module.css';
 
 const PLATFORMS = [
@@ -53,6 +54,7 @@ export default function Setup() {
   const [showCustomConfirm, setShowCustomConfirm] = useState(false);
   const [customInstructionsInput, setCustomInstructionsInput] = useState('');
   const [customMode, setCustomMode] = useState('rephrase');
+  const { user, syncState, signOut } = useAuth();
   const [toggles, setToggles] = useState({
     
     shortAnswers: false,
@@ -171,6 +173,8 @@ export default function Setup() {
       customMode,
     });
       const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
+      if (user) syncState();
+
 
       navigate('/result', {
         state: {
@@ -207,8 +211,15 @@ export default function Setup() {
         <div className={styles.headerRight}>
           <XPBar xp={state.xp} />
           <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
-        <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
-        <ThemePicker />
+          <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
+          {user ? (
+            <button className={styles.badgesLink} onClick={async () => { navigate('/auth'); await signOut(); }} title="Sign out" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>
+              👤
+            </button>
+          ) : (
+            <Link to="/auth" className={styles.badgesLink} title="Log in">👤</Link>
+          )}
+          <ThemePicker />
         </div>
       </header>
 

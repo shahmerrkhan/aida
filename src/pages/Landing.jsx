@@ -2,8 +2,11 @@ import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
 import ThemePicker from '../components/ThemePicker';
 import styles from './Landing.module.css';
+import { useAuth } from '../context/AuthContext';
+
 
 export default function Landing() {
+  const { user } = useAuth();
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -27,7 +30,14 @@ export default function Landing() {
               <span>Start Building</span>
               <span className={styles.ctaArrow}>→</span>
             </Link>
-            <p className={styles.ctaSubtext}>No account. No setup. Everything stays local.</p>
+            {user ? (
+              <p className={styles.ctaSubtext}>Logged in as {user.email}</p>
+            ) : (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <Link to="/auth" className={styles.ctaSecondary}>Log in</Link>
+                <p className={styles.ctaSubtext}>or continue without an account</p>
+              </div>
+            )}
           </div>
         </section>
 

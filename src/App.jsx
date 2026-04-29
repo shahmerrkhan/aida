@@ -5,6 +5,7 @@ import Setup from './pages/Setup';
 import Result from './pages/Result';
 import Badges from './pages/Badges';
 import MyPrompts from './pages/MyPrompts';
+import Auth from './pages/Auth';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       >
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/setup" element={<Setup />} />
           <Route path="/result" element={<Result />} />
           <Route path="/badges" element={<Badges />} />
