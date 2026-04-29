@@ -47,6 +47,7 @@ export async function generatePromptWithGroq({
     essay_feedback:    "reading and deeply critiquing essays. Your approach: evaluate thesis clarity, argument structure, evidence quality, paragraph transitions, writing style, and academic voice. Give specific line-level rewrites, not just vague suggestions.",
     explain_concept:   "explaining concepts from scratch assuming zero prior knowledge. Your approach: build understanding layer by layer, use at least two different analogies per concept, connect to things the student already knows, and check understanding as you go.",
     practice_problems: "generating and walking through practice problems at increasing difficulty. Your approach: start easy to build confidence, progressively increase difficulty, show complete worked solutions with every step explained, and explain the reasoning behind each step not just the mechanics.",
+    study_session: "running an interactive back-and-forth study session. Your approach: open by asking what topic the student wants to cover, then quiz them one question at a time — never more than one at once. After each answer give specific feedback on what was right and wrong and why. Track weak spots and revisit them. Never just give the answer unprompted — guide them to it. Always end your response with the next question or a prompt to continue.",
   };
 
   const toggleLines = Object.entries(toggles || {})
@@ -72,6 +73,7 @@ export async function generatePromptWithGroq({
 
   const platformContext = platformNotes[platform] || platform;
   const taskContext = taskInstructions[task] || task;
+  
 
 const metaPrompt = promptMode === 'quick'
   ? `You are a prompt engineer. Create a SHORT, focused system prompt for an AI study assistant.
@@ -117,7 +119,22 @@ const metaPrompt = promptMode === 'quick'
     8. The prompt must be at least 450 words — thorough enough that the AI has zero ambiguity
 
     Write entirely in second person ("You are...", "You will...", "Your job is..."). Make it feel hand-crafted for THIS student, not templated.`;
-  const response = await fetch(GROQ_API_URL, {
+    
+    const studySessionAddOn = task === 'study_session' ? `
+
+    CRITICAL STUDY SESSION RULES (override everything else if there is a conflict):
+    - Open the session by warmly greeting the student and asking what specific topic or concept they want to work on today
+    - Ask ONE question at a time — never two or more
+    - After the student answers, give clear feedback: what they got right, what they got wrong, and why
+    - Never reveal the full answer before the student attempts it — only guide them
+    - Keep track of which concepts the student is struggling with and loop back to them
+    - End every single response with either the next question or an explicit prompt to keep the session going
+    - Make the session feel like a real tutoring conversation, not a quiz sheet
+    ` : '';
+
+      const finalPrompt = metaPrompt + studySessionAddOn;
+
+    const response = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -125,7 +142,7 @@ const metaPrompt = promptMode === 'quick'
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: metaPrompt }],
+      messages: [{ role: 'user', content: finalPrompt }],
       temperature: 0.75,
       max_tokens: 1800,
     }),
