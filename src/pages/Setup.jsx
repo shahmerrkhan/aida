@@ -7,8 +7,8 @@ import XPBar from '../components/XPBar';
 import GeneratingAnimation from '../components/GeneratingAnimation';
 import { generatePromptWithGroq } from '../utils/groqApi';
 import { parseFile } from '../utils/fileParser';
-import { recordPrompt, getState } from '../utils/achievements';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
+import { recordPrompt, getState, getCurrentLevel } from '../utils/achievements';
 import styles from './Setup.module.css';
 
 const PLATFORMS = [
@@ -154,8 +154,11 @@ export default function Setup() {
           xpGained: result.xpGained,
           newBadges: result.newBadges,
           totalXP: result.state.xp,
-        },
-      });
+         leveledUp: result.state.level !== undefined && getCurrentLevel(result.state.xp - result.xpGained) < getCurrentLevel(result.state.xp),
+         newLevel: getCurrentLevel(result.state.xp),
+         },
+        });
+      
     } catch (err) {
       const msg = err.message;
       if (msg === 'NO_KEY') setError('Groq API key not configured. Check your .env file.');

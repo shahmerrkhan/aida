@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import ThemePicker from '../components/ThemePicker';
 import XPBar from '../components/XPBar';
-import { BADGES } from '../utils/achievements';
+import { BADGES, getLevelInfo } from '../utils/achievements';
 import styles from './Result.module.css';
 import SavePromptModal from '../components/SavePromptModal';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
@@ -49,19 +49,24 @@ const PLATFORM_URLS = {
 export default function Result() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { prompt, platform, task, subject, xpGained, newBadges, totalXP } = location.state || {};
-
+  const { prompt, platform, task, subject, xpGained, newBadges, totalXP, leveledUp, newLevel } = location.state || {};
   const [copied, setCopied] = useState(false);
   const [showXP, setShowXP] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const { addPrompt, addToHistory } = usePromptLibrary();
   const [shared, setShared] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
 
   useEffect(() => {
   if (!prompt) { navigate('/setup'); return; }
   addToHistory({ content: prompt, platform, task, subject });
   const t = setTimeout(() => setShowXP(true), 300);
+  const didLevelUp = location.state?.leveledUp;
+  if (didLevelUp) {
+    const t2 = setTimeout(() => setShowLevelUp(true), 800);
+    return () => { clearTimeout(t); clearTimeout(t2); };
+  }
   return () => clearTimeout(t);
 }, [prompt, navigate]);
 
@@ -250,6 +255,24 @@ function handleShareTwitter() {
           "Open in {platformLabel}" copies the prompt to your clipboard and opens {platformLabel} in a new tab. Just paste when you get there.
         </p>
 
+      {showLevelUp && (() => {
+        const levelInfo = getLevelInfo(newLevel);
+        return (
+        <div className={styles.levelUpOverlay} onClick={() => setShowLevelUp(false)}>
+          <div className={styles.levelUpCard} onClick={e => e.stopPropagation()}>
+            <div className={styles.levelUpGlow} />
+            <div className={styles.levelUpEmoji}>{levelInfo.emoji}</div>
+            <div className={styles.levelUpBadge}>LEVEL UP</div>
+            <h2 className={styles.levelUpLevel}>Level {newLevel}</h2>
+            <p className={styles.levelUpTitle}>{levelInfo.label}</p>
+            <p className={styles.levelUpSub}>You're on a roll. Keep building.</p>
+            <button className={styles.levelUpBtn} onClick={() => setShowLevelUp(false)}>
+              Let's go →
+            </button>
+          </div>
+        </div>
+      );
+    })()}
       </main>
 
       <SavePromptModal
