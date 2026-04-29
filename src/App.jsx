@@ -9,14 +9,19 @@ import MyPrompts from './pages/MyPrompts';
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter 
+        future={{ 
+          v7_startTransition: true, 
+          v7_relativeSplatPath: true 
+        }}
+      >
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/setup" element={<Setup />} />
           <Route path="/result" element={<Result />} />
           <Route path="/badges" element={<Badges />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
           <Route path="/my-prompts" element={<MyPrompts />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

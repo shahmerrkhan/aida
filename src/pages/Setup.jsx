@@ -31,6 +31,7 @@ const TASKS = [
   { id: 'essay_feedback', label: 'Essay Feedback', icon: '✍️' },
   { id: 'explain_concept', label: 'Explain a Concept', icon: '💡' },
   { id: 'practice_problems', label: 'Practice Problems', icon: '🔢' },
+  { id: 'study_session', label: 'Study Session', icon: '🎓' }
 ];
 
 export default function Setup() {
@@ -63,6 +64,10 @@ export default function Setup() {
   const [isLoading, setIsLoading] = useState(false);
   const [fileParseError, setFileParseError] = useState('');
   const location = useLocation();
+  const [showTooltips, setShowTooltips] = useState(() => {
+  const seen = localStorage.getItem('aida_onboarding_seen');
+  return !seen;
+  });
 
   useEffect(() => {
   if (location.state?.preset) {
@@ -80,6 +85,13 @@ export default function Setup() {
   if (t) setTask(t);
   if (s) setSubject(s);
   }, []);
+
+  useEffect(() => {
+  if (showTooltips && (platform || task || subject)) {
+    localStorage.setItem('aida_onboarding_seen', 'true');
+    setShowTooltips(false);
+  }
+  }, [platform, task, subject, showTooltips]);
 
   useEffect(() => {
   setPresetSaved(false);
@@ -222,6 +234,13 @@ export default function Setup() {
         {/* Platform */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>01 — Pick your AI</label>
+
+          {showTooltips && (
+          <div className={styles.tooltip}>
+            Pick which AI you use most. Aida tailors the prompt for that platform's strengths.
+          </div>
+        )}
+
           <div className={styles.platformGrid}>
             {PLATFORMS.map(p => (
               <button
@@ -277,10 +296,16 @@ export default function Setup() {
             </div>
           </div>
         </section>
-
         {/* Vibe */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>04 — Tone & Vibe</label>
+
+          {showTooltips && (
+            <div className={styles.tooltip}>
+              Adjust how casual vs formal the AI should be. Move left for chill, right for strict.
+            </div>
+          )}
+
           <div className={styles.vibeContainer}>
             <input
               type="range"
@@ -321,6 +346,13 @@ export default function Setup() {
         {/* File Upload */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>06 — Upload notes (optional)</label>
+
+          {showTooltips && (
+            <div className={styles.tooltip}>
+              Upload your lecture notes, PDFs, or textbook pages. Aida reads them and bakes them into the prompt.
+            </div>
+          )}
+
           {notesFileName ? (
             <div className={styles.fileLoaded}>
               <span className={styles.fileIcon}>📎</span>

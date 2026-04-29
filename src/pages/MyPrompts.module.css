@@ -360,3 +360,66 @@
   background: var(--bg-secondary);
 }
 
+.pageContent {
+  display: flex;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .pageContent {
+    flex-direction: column;
+  }
+}
+
+.sidebar {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    min-width: unset;
+  }
+}
+
+
+.ratingSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+  margin-top: 10px;
+}
+
+.ratingLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-muted);
+  padding: 0;
+  transition: color 0.2s ease;
+  line-height: 1;
+}
+
+.star:hover {
+  color: var(--accent);
+}
+
+.starActive {
+  color: var(--accent);
+}

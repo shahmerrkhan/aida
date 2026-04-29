@@ -1,8 +1,7 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import styles from './MyPrompts.module.css';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
-import { Link } from 'react-router-dom';
 import ThemePicker from '../components/ThemePicker';
 import XPBar from '../components/XPBar';
 import { getState } from '../utils/achievements';
@@ -58,6 +57,27 @@ export default function MyPrompts() {
         },
       },
     });
+  };
+
+  const [ratings, setRatings] = useState(() => {
+  try {
+    const stored = localStorage.getItem('aida_prompt_ratings');
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+    }
+  });
+
+  useEffect(() => {
+  try {
+    localStorage.setItem('aida_prompt_ratings', JSON.stringify(ratings));
+  } catch (error) {
+    console.error('Failed to save ratings:', error);
+  }
+  }, [ratings]);
+
+  const handleRate = (promptId, rating) => {
+  setRatings(prev => ({ ...prev, [promptId]: rating }));
   };
 
   return (
@@ -171,6 +191,21 @@ export default function MyPrompts() {
                         </button>
                       </div>
                     </div>
+                    <div className={styles.ratingSection}>
+                    <span className={styles.ratingLabel}>Rate this</span>
+                    <div className={styles.stars}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          className={`${styles.star} ${ratings[prompt.id] >= star ? styles.starActive : ''}`}
+                          onClick={() => handleRate(prompt.id, star)}
+                          title={`Rate ${star} stars`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -195,8 +230,8 @@ export default function MyPrompts() {
           </div>
           <div className={styles.grid}>
             {promptHistory.map((entry) => (
-              <div key={entry.id} className={styles.card}>
-                <div className={styles.cardHeader}>
+                  <div key={`history-${entry.id}`} className={styles.card}>
+                  <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>{entry.subject || 'Untitled'}</h3>
                   <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>
                     {new Date(entry.createdAt).toLocaleDateString()}

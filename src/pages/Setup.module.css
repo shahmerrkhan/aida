@@ -139,7 +139,7 @@
 
 .taskGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
@@ -619,4 +619,21 @@ select {
   border-color: var(--accent);
   color: var(--accent);
   background: var(--highlight-soft);
+}
+
+.tooltip {
+  padding: 12px 14px;
+  background: var(--highlight-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.5;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
