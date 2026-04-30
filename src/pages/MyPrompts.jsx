@@ -14,6 +14,8 @@ export default function MyPrompts() {
   const [filterPlatform, setFilterPlatform] = useState('');
   const [copiedId, setCopiedId] = useState(null);
   const [copiedHistoryId, setCopiedHistoryId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmClearHistory, setConfirmClearHistory] = useState(false);
   const filteredPrompts = useMemo(() => {
     return prompts.filter((p) => {
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) {
@@ -36,9 +38,7 @@ export default function MyPrompts() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Delete this prompt?')) {
-      deletePrompt(id);
-    }
+  setConfirmDeleteId(id);
   };
 
   const handleCopyHistory = (entry) => {
@@ -222,7 +222,7 @@ export default function MyPrompts() {
             </div>
             <button
               className={styles.deleteBtn}
-              onClick={() => { if (window.confirm('Clear all history?')) clearHistory(); }}
+              onClick={() => setConfirmClearHistory(true)}
               style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}
             >
               Clear
@@ -267,6 +267,29 @@ export default function MyPrompts() {
         </div>
       )}
     </main>
+    {confirmDeleteId && (
+      <div className={styles.confirmBackdrop} onClick={() => setConfirmDeleteId(null)}>
+        <div className={styles.confirmCard} onClick={e => e.stopPropagation()}>
+          <p className={styles.confirmText}>Delete this prompt?</p>
+          <div className={styles.confirmActions}>
+            <button className={styles.confirmCancel} onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+            <button className={styles.confirmDelete} onClick={() => { deletePrompt(confirmDeleteId); setConfirmDeleteId(null); }}>Delete</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {confirmClearHistory && (
+      <div className={styles.confirmBackdrop} onClick={() => setConfirmClearHistory(false)}>
+        <div className={styles.confirmCard} onClick={e => e.stopPropagation()}>
+          <p className={styles.confirmText}>Clear all history?</p>
+          <div className={styles.confirmActions}>
+            <button className={styles.confirmCancel} onClick={() => setConfirmClearHistory(false)}>Cancel</button>
+            <button className={styles.confirmDelete} onClick={() => { clearHistory(); setConfirmClearHistory(false); }}>Clear</button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
 )
 }

@@ -66,7 +66,7 @@ export default function Result() {
   const [copied, setCopied] = useState(false);
   const [showXP, setShowXP] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const { addPrompt, addToHistory } = usePromptLibrary();
+  const { addPrompt, addToHistory, prompts: savedPrompts } = usePromptLibrary();
   const [shared, setShared] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -96,7 +96,14 @@ export default function Result() {
     });
   }
   function handleCopyLink() {
-  const params = new URLSearchParams({ platform, task, subject });
+  const params = new URLSearchParams({
+    platform: platform || '',
+    task: task || '',
+    subject: subject || '',
+    vibe: location.state?.vibeLevel ?? 50,
+    toggles: JSON.stringify(location.state?.toggles || {}),
+    mode: location.state?.promptMode || 'detailed',
+  });
   const url = `${window.location.origin}/setup?${params.toString()}`;
   navigator.clipboard.writeText(url).then(() => {
     setShared(true);
@@ -298,6 +305,7 @@ function handleShareTwitter() {
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         onSave={handleSavePrompt}
+        existingNames={savedPrompts.map(p => p.name)}
         promptData={{
           platform: platform,
           taskType: task,

@@ -188,3 +188,13 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.inputWarning {
+  border-color: #f59e0b;
+}
+
+.warningText {
+  font-size: 0.8rem;
+  color: #f59e0b;
+  margin-top: 0.4rem;
+}

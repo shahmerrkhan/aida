@@ -10,6 +10,7 @@ import { parseFile } from '../utils/fileParser';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
 import { recordPrompt, getState, getCurrentLevel } from '../utils/achievements';
 import { useAuth } from '../context/AuthContext';
+import { saveUserSettings, loadUserSettings } from '../utils/syncService';
 import { useXP } from "../context/XPContext";
 import styles from './Setup.module.css';
 
@@ -84,13 +85,31 @@ export default function Setup() {
   }, [location.state?.preset]);
 
   useEffect(() => {
-    const p = searchParams.get('platform');
-    const t = searchParams.get('task');
-    const s = searchParams.get('subject');
-    if (p) setPlatform(p);
-    if (t) setTask(t);
-    if (s) setSubject(s);
-  }, []);
+  if (!user) return;
+  loadUserSettings(user.id).then(settings => {
+    if (!settings) return;
+    if (settings.platform) setPlatform(settings.platform);
+    if (settings.task) setTask(settings.task);
+    if (settings.vibeLevel !== undefined) setVibeLevel(settings.vibeLevel);
+    if (settings.toggles) setToggles(settings.toggles);
+    if (settings.promptMode) setPromptMode(settings.promptMode);
+  });
+}, [user]);
+
+  useEffect(() => {
+  const p = searchParams.get('platform');
+  const t = searchParams.get('task');
+  const s = searchParams.get('subject');
+  const v = searchParams.get('vibe');
+  const tog = searchParams.get('toggles');
+  const m = searchParams.get('mode');
+  if (p) setPlatform(p);
+  if (t) setTask(t);
+  if (s) setSubject(s);
+  if (v) setVibeLevel(Number(v));
+  if (tog) { try { setToggles(JSON.parse(tog)); } catch {} }
+  if (m) setPromptMode(m);
+}, []);
 
   useEffect(() => {
     if (showTooltips && (platform || task || subject)) {
@@ -179,6 +198,9 @@ export default function Setup() {
       });
 
       const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
+      if (user) {
+        saveUserSettings(user.id, { platform, task, vibeLevel, toggles, promptMode });
+      }
       setXP(result.state.xp);
 
       navigate('/result', {
@@ -187,6 +209,9 @@ export default function Setup() {
           platform,
           task,
           subject,
+          vibeLevel,
+          toggles,
+          promptMode,
           xpGained: result.xpGained,
           newBadges: result.newBadges,
           totalXP: result.state.xp,

@@ -423,3 +423,54 @@
 .starActive {
   color: var(--accent);
 }
+
+.confirmBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.confirmCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 280px;
+  text-align: center;
+}
+
+.confirmText {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.confirmCancel {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.confirmDelete {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}

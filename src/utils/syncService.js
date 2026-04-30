@@ -168,3 +168,34 @@ export async function deletePreset(userId, presetId) {
   
   if (error) console.error('Failed to delete preset:', error);
 }
+
+export async function saveUserSettings(userId, settings) {
+  const { error } = await supabase
+    .from('user_state')
+    .upsert({
+      id: userId,
+      pref_platform: settings.platform,
+      pref_task: settings.task,
+      pref_vibe: settings.vibeLevel,
+      pref_toggles: settings.toggles,
+      pref_prompt_mode: settings.promptMode,
+      updated_at: new Date().toISOString(),
+    });
+  if (error) console.error('Failed to save settings:', error);
+}
+
+export async function loadUserSettings(userId) {
+  const { data, error } = await supabase
+    .from('user_state')
+    .select('pref_platform, pref_task, pref_vibe, pref_toggles, pref_prompt_mode')
+    .eq('id', userId)
+    .single();
+  if (error || !data) return null;
+  return {
+    platform: data.pref_platform || '',
+    task: data.pref_task || '',
+    vibeLevel: data.pref_vibe ?? 50,
+    toggles: data.pref_toggles || null,
+    promptMode: data.pref_prompt_mode || 'detailed',
+  };
+}
