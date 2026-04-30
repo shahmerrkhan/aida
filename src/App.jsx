@@ -6,6 +6,7 @@ import Landing from './pages/Landing';
 import Setup from './pages/Setup';
 import Result from './pages/Result';
 import Badges from './pages/Badges';
+import FeedbackWidget from './components/FeedbackWidget';
 import MyPrompts from './pages/MyPrompts';
 import Auth from './pages/Auth';
 import Templates from './pages/Templates';
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/templates" element={<Templates />} />
           </Routes>
+          <FeedbackWidget />
         </BrowserRouter>
       </ThemeProvider>
     </XPProvider>

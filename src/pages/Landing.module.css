@@ -32,9 +32,10 @@
   padding: 80px 24px 60px;
   gap: 80px;
   width: 100%;
+  box-sizing: border-box;
 }
 
-/* ===== HERO ===== */
+/* HERO */
 .heroSection {
   max-width: 680px;
   width: 100%;
@@ -82,11 +83,13 @@
   align-items: center;
   gap: 12px;
   margin-top: 8px;
+  width: 100%;
 }
 
 .ctaPrimary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 16px 40px;
   background: var(--accent);
@@ -124,10 +127,47 @@
   letter-spacing: 0.03em;
 }
 
-/* ===== MOCKUP ===== */
+.ctaSecondary {
+  padding: 10px 24px;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ctaSecondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--highlight-soft);
+}
+
+/* SOCIAL PROOF */
+.socialProof {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.socialDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+/* MOCKUP */
 .mockupSection {
   width: 100%;
   max-width: 720px;
+  box-sizing: border-box;
 }
 
 .mockupWindow {
@@ -246,13 +286,14 @@
   margin-top: 4px;
 }
 
-/* ===== FEATURES ===== */
+/* FEATURES */
 .featuresSection {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
   max-width: 900px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .featureCard {
@@ -290,7 +331,72 @@
   line-height: 1.6;
 }
 
-/* ===== FOOTER ===== */
+/* HOW IT WORKS */
+.howSection {
+  max-width: 680px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.howTitle {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin: 0 0 32px;
+  letter-spacing: -0.02em;
+}
+
+.howSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.howStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+}
+
+.howStepNum {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.howStepText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.howStepTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.howStepDesc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* FOOTER */
 .footer {
   text-align: center;
   padding: 24px;
@@ -299,37 +405,24 @@
   font-size: 0.85rem;
 }
 
-/* ===== RESPONSIVE ===== */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .header { padding: 14px 18px; }
-  .main { padding: 60px 18px 40px; gap: 60px; }
+  .main { padding: 48px 18px 40px; gap: 56px; }
   .heroTitle { font-size: 2.4rem; }
-  .featuresSection { grid-template-columns: 1fr; }
-  .mockupBody { padding: 16px; }
+  .featuresSection { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .mockupBody { padding: 16px; gap: 14px; }
 }
 
 @media (max-width: 480px) {
-  .heroTitle { font-size: 2rem; }
+  .header { padding: 12px 16px; }
+  .main { padding: 36px 16px 40px; gap: 48px; }
+  .heroTitle { font-size: 2rem; line-height: 1.2; }
   .heroSubtitle { font-size: 0.95rem; }
-  .ctaPrimary { width: 100%; justify-content: center; }
+  .ctaPrimary { width: 100%; padding: 14px 24px; }
   .featuresSection { grid-template-columns: 1fr; }
-}
-
-.ctaSecondary {
-  padding: 10px 24px;
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.ctaSecondary:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--highlight-soft);
+  .mockupBar { padding: 10px 12px; }
+  .mockupBody { padding: 14px; gap: 12px; }
+  .mockupChip { font-size: 0.75rem; padding: 5px 10px; }
+  .mockupGenBtn { font-size: 0.85rem; padding: 10px 16px; }
 }

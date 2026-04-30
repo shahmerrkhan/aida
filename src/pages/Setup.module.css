@@ -733,3 +733,32 @@ select {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px var(--shadow);
 }
+
+@media (max-width: 768px) {
+  .main { padding: 40px 18px; }
+  .title { font-size: 1.8rem; }
+  .platformGrid { grid-template-columns: repeat(3, 1fr); }
+  .taskGrid { grid-template-columns: repeat(2, 1fr); }
+  .inputRow { grid-template-columns: 1fr; }
+  .toggleGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .header { padding: 12px 14px; }
+  .headerRight { gap: 8px; }
+  .main { padding: 28px 14px; }
+  .title { font-size: 1.5rem; }
+  .subtitle { font-size: 0.9rem; }
+  .platformGrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .platformCard { padding: 12px 8px; }
+  .platformLabel { font-size: 0.82rem; }
+  .platformSub { font-size: 0.68rem; }
+  .taskGrid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .taskCard { padding: 12px 8px; }
+  .taskIcon { font-size: 1.3rem; }
+  .taskLabel { font-size: 0.78rem; }
+  .uploadZone { padding: 20px 16px; }
+  .generateBtn { padding: 14px 20px; font-size: 0.95rem; }
+  .toggleGrid { grid-template-columns: 1fr; }
+  .toggleItem { padding: 10px 14px; }
+}
