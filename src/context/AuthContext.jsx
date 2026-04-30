@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { loadUserState, saveUserState } from '../utils/syncService';
 
 const AuthContext = createContext({});
 
@@ -20,40 +19,20 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const cloudState = await loadUserState(currentUser.id);
-        if (cloudState) {
-          localStorage.setItem('aida_state', JSON.stringify({
-            ...cloudState,
-            platformsUsed: Array.from(cloudState.platformsUsed),
-          }));
-        }
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function syncState() {
-    if (!user) return;
-    const localState = JSON.parse(localStorage.getItem('aida_state') || '{}');
-    await saveUserState(user.id, {
-      ...localState,
-      platformsUsed: new Set(localState.platformsUsed || []),
-    });
-  }
-
   async function signOut() {
-    await syncState();
     await supabase.auth.signOut();
+    setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, syncState, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

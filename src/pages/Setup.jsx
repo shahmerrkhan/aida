@@ -10,6 +10,7 @@ import { parseFile } from '../utils/fileParser';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
 import { recordPrompt, getState, getCurrentLevel } from '../utils/achievements';
 import { useAuth } from '../context/AuthContext';
+import { useXP } from "../context/XPContext";
 import styles from './Setup.module.css';
 
 const PLATFORMS = [
@@ -41,6 +42,7 @@ export default function Setup() {
   const { theme } = useTheme();
   const state = getState();
   const { presets, addPreset, deletePreset } = usePromptLibrary();
+  const { setXP } = useXP();
   const [platform, setPlatform] = useState('');
   const [task, setTask] = useState('');
   const [subject, setSubject] = useState('');
@@ -56,7 +58,6 @@ export default function Setup() {
   const [customMode, setCustomMode] = useState('rephrase');
   const { user, syncState, signOut } = useAuth();
   const [toggles, setToggles] = useState({
-    
     shortAnswers: false,
     dontRepeat: false,
     citeSource: false,
@@ -70,71 +71,71 @@ export default function Setup() {
   const [fileParseError, setFileParseError] = useState('');
   const location = useLocation();
   const [showTooltips, setShowTooltips] = useState(() => {
-  const seen = localStorage.getItem('aida_onboarding_seen');
-  return !seen;
+    const seen = localStorage.getItem('aida_onboarding_seen');
+    return !seen;
   });
 
   useEffect(() => {
-  if (location.state?.preset) {
-    setPlatform(location.state.preset.platform);
-    setTask(location.state.preset.taskType);
-    setSubject(location.state.preset.subject);
-  }
+    if (location.state?.preset) {
+      setPlatform(location.state.preset.platform);
+      setTask(location.state.preset.taskType);
+      setSubject(location.state.preset.subject);
+    }
   }, [location.state?.preset]);
 
   useEffect(() => {
-  const p = searchParams.get('platform');
-  const t = searchParams.get('task');
-  const s = searchParams.get('subject');
-  if (p) setPlatform(p);
-  if (t) setTask(t);
-  if (s) setSubject(s);
+    const p = searchParams.get('platform');
+    const t = searchParams.get('task');
+    const s = searchParams.get('subject');
+    if (p) setPlatform(p);
+    if (t) setTask(t);
+    if (s) setSubject(s);
   }, []);
 
   useEffect(() => {
-  if (showTooltips && (platform || task || subject)) {
-    localStorage.setItem('aida_onboarding_seen', 'true');
-    setShowTooltips(false);
-  }
+    if (showTooltips && (platform || task || subject)) {
+      localStorage.setItem('aida_onboarding_seen', 'true');
+      setShowTooltips(false);
+    }
   }, [platform, task, subject, showTooltips]);
 
   useEffect(() => {
-  setPresetSaved(false);
+    setPresetSaved(false);
   }, [platform, task, subject]);
 
   async function handleFileUpload(e) {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
-  setFileParseError('');
-  setIsLoading(true);
-  try {
-    const contents = await Promise.all(files.map(f => parseFile(f)));
-    const newContent = notesContent 
-      ? notesContent + '\n\n---\n\n' + contents.join('\n\n---\n\n')
-      : contents.join('\n\n---\n\n');
-    setNotesContent(newContent);
-    setNotesFileName(
-      notesFileName 
-        ? `${notesFileName} + ${files.length} more file${files.length > 1 ? 's' : ''}`
-        : files.length === 1 ? files[0].name : `${files.length} files`
-    );
-    if (fileRef.current) fileRef.current.value = '';
-  } catch (err) {
-    setFileParseError(`Failed to parse file: ${err.message}`);
-    if (fileRef.current) fileRef.current.value = '';
-  } finally {
-    setIsLoading(false);
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setFileParseError('');
+    setIsLoading(true);
+    try {
+      const contents = await Promise.all(files.map(f => parseFile(f)));
+      const newContent = notesContent 
+        ? notesContent + '\n\n---\n\n' + contents.join('\n\n---\n\n')
+        : contents.join('\n\n---\n\n');
+      setNotesContent(newContent);
+      setNotesFileName(
+        notesFileName 
+          ? `${notesFileName} + ${files.length} more file${files.length > 1 ? 's' : ''}`
+          : files.length === 1 ? files[0].name : `${files.length} files`
+      );
+      if (fileRef.current) fileRef.current.value = '';
+    } catch (err) {
+      setFileParseError(`Failed to parse file: ${err.message}`);
+      if (fileRef.current) fileRef.current.value = '';
+    } finally {
+      setIsLoading(false);
+    }
   }
-}
 
   function removeFile() {
-  setNotesFileName('');
-  setNotesContent('');
-  setFileParseError('');
-  if (fileRef.current) {
-    fileRef.current.value = '';
+    setNotesFileName('');
+    setNotesContent('');
+    setFileParseError('');
+    if (fileRef.current) {
+      fileRef.current.value = '';
+    }
   }
-}
 
   function toggleItem(key) {
     setToggles(prev => ({ ...prev, [key]: !prev[key] }));
@@ -146,12 +147,13 @@ export default function Setup() {
     vibeLevel < 75 ? '😊 Casual' :
     '🔥 Full Chill Mode';
 
-   function handleSavePreset() {
-  if (!platform || !task || !subject.trim() || presetSaved) return;
-  addPreset({ platform, task, subject: subject.trim() });
-  setPresetSaved(true);
-  setTimeout(() => setPresetSaved(false), 2000);
+  function handleSavePreset() {
+    if (!platform || !task || !subject.trim() || presetSaved) return;
+    addPreset({ platform, task, subject: subject.trim() });
+    setPresetSaved(true);
+    setTimeout(() => setPresetSaved(false), 2000);
   }
+
   async function handleGenerate() {
     if (!platform) { setError('Pick an AI platform first.'); return; }
     if (!task) { setError('Choose what you need help with.'); return; }
@@ -161,20 +163,20 @@ export default function Setup() {
 
     try {
       const generatedPrompt = await generatePromptWithGroq({
-      platform,
-      task,
-      subject: subject.trim(),
-      topic: topic.trim(),
-      vibeLevel,
-      fileContent: notesContent,
-      toggles,
-      customInstructions: customInstructions.trim(),
-      promptMode,
-      customMode,
-    });
-      const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
-      if (user) syncState();
+        platform,
+        task,
+        subject: subject.trim(),
+        topic: topic.trim(),
+        vibeLevel,
+        fileContent: notesContent,
+        toggles,
+        customInstructions: customInstructions.trim(),
+        promptMode,
+        customMode,
+      });
 
+      const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
+      setXP(result.state.xp);
 
       navigate('/result', {
         state: {
@@ -185,10 +187,10 @@ export default function Setup() {
           xpGained: result.xpGained,
           newBadges: result.newBadges,
           totalXP: result.state.xp,
-         leveledUp: result.state.level !== undefined && getCurrentLevel(result.state.xp - result.xpGained) < getCurrentLevel(result.state.xp),
-         newLevel: getCurrentLevel(result.state.xp),
-         },
-        });
+          leveledUp: result.state.level !== undefined && getCurrentLevel(result.state.xp - result.xpGained) < getCurrentLevel(result.state.xp),
+          newLevel: getCurrentLevel(result.state.xp),
+        },
+      });
       
     } catch (err) {
       const msg = err.message;
@@ -213,7 +215,15 @@ export default function Setup() {
           <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
           <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
           {user ? (
-            <button className={styles.badgesLink} onClick={async () => { navigate('/auth'); await signOut(); }} title="Sign out" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>
+            <button 
+              className={styles.badgesLink} 
+              onClick={async () => { 
+                await signOut();
+                navigate('/'); 
+              }} 
+              title="Sign out" 
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+            >
               👤
             </button>
           ) : (
@@ -230,14 +240,15 @@ export default function Setup() {
         {presets.length > 0 && (
           <section className={styles.section} style={{ textAlign: 'center' }}>
             <label className={styles.sectionLabel} style={{ textAlign: 'center' }}>⚡ Quick Presets</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>              {presets.map((preset) => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
+              {presets.map((preset) => (
                 <div key={preset.id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <button
                     className={styles.presetBtn}
                     onClick={() => {
-                        setPlatform(preset.platform);
-                        setTask(preset.task);
-                        setSubject(preset.subject);
+                      setPlatform(preset.platform);
+                      setTask(preset.task);
+                      setSubject(preset.subject);
                     }}
                   >
                     <span className={styles.presetBtnLabel}>{preset.subject}</span>
@@ -256,15 +267,14 @@ export default function Setup() {
           </section>
         )}
 
-        {/* Platform */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>01 — Pick your AI</label>
 
           {showTooltips && (
-          <div className={styles.tooltip}>
-            Pick which AI you use most. Aida tailors the prompt for that platform's strengths.
-          </div>
-        )}
+            <div className={styles.tooltip}>
+              Pick which AI you use most. Aida tailors the prompt for that platform's strengths.
+            </div>
+          )}
 
           <div className={styles.platformGrid}>
             {PLATFORMS.map(p => (
@@ -280,7 +290,6 @@ export default function Setup() {
           </div>
         </section>
 
-        {/* Task */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>02 — What do you need?</label>
           <div className={styles.taskGrid}>
@@ -297,7 +306,6 @@ export default function Setup() {
           </div>
         </section>
 
-        {/* Subject & Topic */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>03 — Subject & Topic</label>
           <div className={styles.inputRow}>
@@ -321,7 +329,7 @@ export default function Setup() {
             </div>
           </div>
         </section>
-        {/* Vibe */}
+
         <section className={styles.section}>
           <label className={styles.sectionLabel}>04 — Tone & Vibe</label>
 
@@ -344,7 +352,6 @@ export default function Setup() {
           </div>
         </section>
 
-        {/* Toggles */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>05 — Preferences</label>
           <div className={styles.toggleGrid}>
@@ -368,7 +375,6 @@ export default function Setup() {
           </div>
         </section>
 
-        {/* File Upload */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>06 — Upload notes (optional)</label>
 
@@ -414,7 +420,6 @@ export default function Setup() {
           {fileParseError && <p className={styles.fileError}>⚠ {fileParseError}</p>}
         </section>
 
-        {/* Custom Instructions */}
         <section className={styles.section}>
           <label className={styles.sectionLabel}>07 — Anything else? (optional)</label>
           <textarea

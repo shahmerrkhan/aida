@@ -1,15 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import {
-  loadSavedPrompts,
-  addSavedPrompt,
-  deleteSavedPrompt as deleteSupabasePrompt,
-  loadPromptHistory,
-  addPromptHistory,
-  loadPresets,
-  addPreset as addSupabasePreset,
-  deletePreset as deleteSupabasePreset,
-} from '../utils/syncService';
+import { useXP } from '../context/XPContext';
 
 const STORAGE_KEY = 'aida_prompt_library';
 const HISTORY_KEY = 'aida_prompt_history';
@@ -18,105 +8,83 @@ const PRESETS_KEY = 'aida_presets';
 const MAX_PRESETS = 8;
 
 export function usePromptLibrary() {
-  const { user } = useAuth();
+  const { xp, setXP, level, setLevel } = useXP();
   const [prompts, setPrompts] = useState([]);
   const [promptHistory, setPromptHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [presets, setPresets] = useState([]);
 
+  // Load from localStorage on mount
   useEffect(() => {
-    async function load() {
-      setIsLoading(true);
-      if (user) {
-        const [cloudPrompts, cloudHistory, cloudPresets] = await Promise.all([
-          loadSavedPrompts(user.id),
-          loadPromptHistory(user.id),
-          loadPresets(user.id),
-        ]);
-        setPrompts(cloudPrompts);
-        setPromptHistory(cloudHistory);
-        setPresets(cloudPresets);
-      } else {
-        try {
-          const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) setPrompts(JSON.parse(stored));
-          const history = localStorage.getItem(HISTORY_KEY);
-          if (history) setPromptHistory(JSON.parse(history));
-          const savedPresets = localStorage.getItem(PRESETS_KEY);
-          if (savedPresets) setPresets(JSON.parse(savedPresets));
-        } catch (error) {
-          console.error('Failed to load from localStorage:', error);
-        }
-      }
-      setIsLoading(false);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) setPrompts(JSON.parse(stored));
+      const history = localStorage.getItem(HISTORY_KEY);
+      if (history) setPromptHistory(JSON.parse(history));
+      const savedPresets = localStorage.getItem(PRESETS_KEY);
+      if (savedPresets) setPresets(JSON.parse(savedPresets));
+    } catch (error) {
+      console.error('Failed to load from localStorage:', error);
     }
-    load();
-  }, [user]);
+    setIsLoading(false);
+  }, []);
 
+  // Save prompts to localStorage
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
       } catch (error) {
         console.error('Failed to save prompts:', error);
       }
     }
-  }, [prompts, isLoading, user]);
+  }, [prompts, isLoading]);
 
+  // Save history to localStorage
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading) {
       try {
         localStorage.setItem(HISTORY_KEY, JSON.stringify(promptHistory));
       } catch (error) {
         console.error('Failed to save history:', error);
       }
     }
-  }, [promptHistory, isLoading, user]);
+  }, [promptHistory, isLoading]);
 
+  // Save presets to localStorage
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading) {
       try {
         localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
       } catch (error) {
         console.error('Failed to save presets:', error);
       }
     }
-  }, [presets, isLoading, user]);
+  }, [presets, isLoading]);
 
-  const addPrompt = async (promptData) => {
-    if (user) {
-      const saved = await addSavedPrompt(user.id, promptData);
-      if (saved) setPrompts(prev => [{ ...promptData, id: saved.id, createdAt: saved.created_at, usageCount: 0 }, ...prev]);
-    } else {
-      const newPrompt = {
-        id: Date.now().toString(),
-        ...promptData,
-        createdAt: new Date().toISOString(),
-        usageCount: 0,
-      };
-      setPrompts(prev => [newPrompt, ...prev]);
-      return newPrompt;
-    }
+  const addPrompt = (promptData) => {
+    const newPrompt = {
+      id: Date.now().toString(),
+      ...promptData,
+      createdAt: new Date().toISOString(),
+      usageCount: 0,
+    };
+    setPrompts(prev => [newPrompt, ...prev]);
+    return newPrompt;
   };
 
-  const addToHistory = async (entry) => {
+  const addToHistory = (entry) => {
     const newEntry = {
       id: Date.now().toString(),
       ...entry,
       createdAt: new Date().toISOString(),
     };
-    if (user) {
-      await addPromptHistory(user.id, entry);
-    }
     setPromptHistory(prev => [newEntry, ...prev].slice(0, MAX_HISTORY));
   };
 
   const clearHistory = () => setPromptHistory([]);
 
-  const deletePrompt = async (id) => {
-    if (user) {
-      await deleteSupabasePrompt(user.id, id);
-    }
+  const deletePrompt = (id) => {
     setPrompts(prev => prev.filter(p => p.id !== id));
   };
 
@@ -128,24 +96,16 @@ export function usePromptLibrary() {
     );
   };
 
-  const addPreset = async (preset) => {
-    if (user) {
-      const saved = await addSupabasePreset(user.id, preset);
-      if (saved) setPresets(prev => [{ ...preset, id: saved.id, createdAt: saved.created_at }, ...prev].slice(0, MAX_PRESETS));
-    } else {
-      const newPreset = {
-        id: Date.now().toString(),
-        ...preset,
-        createdAt: new Date().toISOString(),
-      };
-      setPresets(prev => [newPreset, ...prev].slice(0, MAX_PRESETS));
-    }
+  const addPreset = (preset) => {
+    const newPreset = {
+      id: Date.now().toString(),
+      ...preset,
+      createdAt: new Date().toISOString(),
+    };
+    setPresets(prev => [newPreset, ...prev].slice(0, MAX_PRESETS));
   };
 
-  const deletePreset = async (id) => {
-    if (user) {
-      await deleteSupabasePreset(user.id, id);
-    }
+  const deletePreset = (id) => {
     setPresets(prev => prev.filter(p => p.id !== id));
   };
 
@@ -168,6 +128,10 @@ export function usePromptLibrary() {
     promptHistory,
     presets,
     isLoading,
+    xp,
+    level,
+    setXP,
+    setLevel,
     addPrompt,
     addToHistory,
     addPreset,
