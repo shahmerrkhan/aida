@@ -43,13 +43,13 @@ export default function Setup() {
   const state = getState();
   const { presets, addPreset, deletePreset } = usePromptLibrary();
   const { setXP } = useXP();
-  const [platform, setPlatform] = useState('');
-  const [task, setTask] = useState('');
+  const [platform, setPlatform] = useState(() => localStorage.getItem('aida_pref_platform') || '');
+  const [task, setTask] = useState(() => localStorage.getItem('aida_pref_task') || '');
   const [subject, setSubject] = useState('');
   const [topic, setTopic] = useState('');
   const [notesContent, setNotesContent] = useState('');
   const [notesFileName, setNotesFileName] = useState('');
-  const [vibeLevel, setVibeLevel] = useState(50);
+  const [vibeLevel, setVibeLevel] = useState(() => Number(localStorage.getItem('aida_pref_vibe')) || 50);
   const [presetSaved, setPresetSaved] = useState(false);
   const [searchParams] = useSearchParams();
   const [promptMode, setPromptMode] = useState('detailed');
@@ -108,6 +108,9 @@ export default function Setup() {
     if (!files.length) return;
     setFileParseError('');
     setIsLoading(true);
+    localStorage.setItem('aida_pref_platform', platform);
+    localStorage.setItem('aida_pref_task', task);
+    localStorage.setItem('aida_pref_vibe', vibeLevel);  
     try {
       const contents = await Promise.all(files.map(f => parseFile(f)));
       const newContent = notesContent 
