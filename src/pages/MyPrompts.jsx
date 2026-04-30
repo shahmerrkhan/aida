@@ -101,7 +101,7 @@ export default function MyPrompts() {
     {/* YOUR EXISTING CONTENT WRAPPED IN MAIN */}
     <main className={styles.main}>
       <div className={styles.container}>
-        <div className={styles.header}>
+        <div className={styles.pageHeader}>
           <div>
             <h1 className={styles.title}>My Prompts</h1>
             <p className={styles.subtitle}>

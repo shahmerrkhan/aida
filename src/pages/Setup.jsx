@@ -421,7 +421,33 @@ export default function Setup() {
         </section>
 
         <section className={styles.section}>
-          <label className={styles.sectionLabel}>07 — Anything else? (optional)</label>
+        <label className={styles.sectionLabel}>07 — Prompt style</label>
+        <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>          <button
+            className={`${styles.taskCard} ${promptMode === 'quick' ? styles.taskCardActive : ''}`}
+            onClick={() => setPromptMode('quick')}
+            style={{ flex: 1, padding: '1.25rem 0' }}
+
+          >
+            <span className={styles.taskIcon}>⚡</span>
+            <span className={styles.taskLabel}>Quick</span>
+          </button>
+          <button
+            className={`${styles.taskCard} ${promptMode === 'detailed' ? styles.taskCardActive : ''}`}
+            onClick={() => setPromptMode('detailed')}
+            style={{ flex: 1, padding: '1.25rem 0' }}
+
+          >
+            <span className={styles.taskIcon}>🔍</span>
+            <span className={styles.taskLabel}>Detailed</span>
+          </button>
+        </div>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+          {promptMode === 'quick' ? 'Short, direct prompt — good for fast questions.' : 'Full structured prompt with all your settings baked in.'}
+        </p>
+        </section>
+
+        <section className={styles.section}>
+          <label className={styles.sectionLabel}>08 — Anything else? (optional)</label>
           <textarea
             className={styles.textarea}
             placeholder="e.g. I'm a visual learner, always use analogies. I struggle with integration by parts specifically..."
