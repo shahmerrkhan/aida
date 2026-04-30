@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-do
 import { useTheme } from '../context/ThemeContext';
 import Logo from '../components/Logo';
 import ThemePicker from '../components/ThemePicker';
+import { saveUserState } from '../utils/syncService';
 import XPBar from '../components/XPBar';
 import GeneratingAnimation from '../components/GeneratingAnimation';
 import { generatePromptWithGroq } from '../utils/groqApi';
@@ -43,7 +44,7 @@ export default function Setup() {
   const { theme } = useTheme();
   const state = getState();
   const { presets, addPreset, deletePreset } = usePromptLibrary();
-  const { setXP } = useXP();
+  const { xp, setXP } = useXP();
   const [platform, setPlatform] = useState(() => localStorage.getItem('aida_pref_platform') || '');
   const [task, setTask] = useState(() => localStorage.getItem('aida_pref_task') || '');
   const [subject, setSubject] = useState('');
@@ -197,9 +198,23 @@ export default function Setup() {
         customMode,
       });
 
-      const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel });
-      if (user) {
+        const currentState = {
+          ...getState(),
+          xp,
+        };
+        const result = recordPrompt({ platform, usedNotes: !!notesContent, vibeLevel }, currentState);      if (user) {
         saveUserSettings(user.id, { platform, task, vibeLevel, toggles, promptMode });
+        // Save full state to Supabase
+        await saveUserState(user.id, {
+          xp: result.state.xp,
+          level: getCurrentLevel(result.state.xp),
+          promptCount: result.state.promptCount,
+          fileCount: result.state.fileCount,
+          platformsUsed: result.state.platformsUsed,
+          lastGeneratedDate: result.state.lastGeneratedDate,
+          streakDays: result.state.streakDays,
+          badges: result.state.badges,
+        });
       }
       setXP(result.state.xp);
 
@@ -239,7 +254,7 @@ export default function Setup() {
           <Logo size="md" />
         </Link>
         <div className={styles.headerRight}>
-          <XPBar xp={state.xp} />
+          <XPBar xp={xp} />
           <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
           <Link to="/my-prompts" className={styles.badgesLink} title="My Prompts">📚</Link>
           {user ? (

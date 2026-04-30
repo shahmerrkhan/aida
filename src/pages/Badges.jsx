@@ -3,26 +3,61 @@ import Logo from '../components/Logo';
 import ThemePicker from '../components/ThemePicker';
 import XPBar from '../components/XPBar';
 import Stats from '../components/Stats';
-import { BADGES, LEVELS, getState, getLevel, getLevelProgress } from '../utils/achievements';
+import { useXP } from '../context/XPContext';
+import { BADGES, LEVELS, getLevel, getLevelProgress } from '../utils/achievements';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { loadUserState } from '../utils/syncService';
 import styles from './Badges.module.css';
 
 export default function Badges() {
-  const state = getState();
-  const level = getLevel(state.xp);
-  const progress = getLevelProgress(state.xp);
+  const { xp, isLoading } = useXP();
 
+  const level = getLevel(xp);
+  const progress = getLevelProgress(xp);
   const currentLevelIndex = LEVELS.findIndex(l => l.level === level);
   const nextLevel = LEVELS[currentLevelIndex + 1];
 
-  // Count earned badges from state
-  const earnedCount = state.badges.filter(b => b.unlocked).length;
+  // For badges and stats, read from localStorage (local activity tracking)
+  const { user } = useAuth();
+  const [userState, setUserState] = useState(null);
+
+  useEffect(() => {
+    if (!user || isLoading) return;
+    
+    const loadState = async () => {
+      const state = await loadUserState(user.id);
+      if (state) {
+        setUserState(state);
+      }
+    };
+    loadState();
+  }, [user, isLoading]);
+
+  const localState = userState || {
+    promptCount: 0,
+    fileCount: 0,
+    platformsUsed: new Set(),
+    streakDays: 0,
+    badges: BADGES.map(b => ({ ...b })),
+  };
+
+  const earnedCount = localState.badges.filter(b => b.unlocked).length;
+
+  if (isLoading) {
+    return (
+      <div className={styles.page}>
+        <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <Link to="/setup" className={styles.backBtn}>← Back to Setup</Link>
         <div className={styles.headerRight}>
-          <XPBar xp={state.xp} />
+          <XPBar xp={xp} />
           <ThemePicker />
         </div>
       </header>
@@ -33,12 +68,11 @@ export default function Badges() {
           <p className={styles.subtitle}>Every prompt gets you closer to the next level.</p>
         </div>
 
-        {/* Level Card */}
         <div className={styles.levelCard}>
           <div className={styles.levelTop}>
             <div>
               <div className={styles.levelName}>{LEVELS[level - 1]?.label || 'Newbie'}</div>
-              <div className={styles.levelXP}>{state.xp.toLocaleString()} XP total</div>
+              <div className={styles.levelXP}>{xp.toLocaleString()} XP total</div>
             </div>
             <div className={styles.levelBadgeCount}>
               <span className={styles.badgeCountNum}>{earnedCount}</span>
@@ -58,29 +92,27 @@ export default function Badges() {
           )}
         </div>
 
-        {/* Stats Row */}
         <Stats />
 
         <div className={styles.statsRow}>
           <div className={styles.statCard}>
-            <span className={styles.statNumber}>{state.promptCount || 0}</span>
+            <span className={styles.statNumber}>{localState.promptCount || 0}</span>
             <span className={styles.statLabel}>Prompts Generated</span>
           </div>
           <div className={styles.statCard}>
-            <span className={styles.statNumber}>{state.platformsUsed.size || 0}</span>
+            <span className={styles.statNumber}>{localState.platformsUsed.size || 0}</span>
             <span className={styles.statLabel}>AI Platforms Tried</span>
           </div>
           <div className={styles.statCard}>
-            <span className={styles.statNumber}>{state.streakDays || 0}</span>
+            <span className={styles.statNumber}>{localState.streakDays || 0}</span>
             <span className={styles.statLabel}>Day Streak 🔥</span>
           </div>
         </div>
 
-        {/* Badges Grid */}
         <div className={styles.sectionLabel}>Badges</div>
         <div className={styles.badgeGrid}>
           {BADGES.map(badge => {
-            const isEarned = state.badges.find(b => b.id === badge.id)?.unlocked || false;
+            const isEarned = localState.badges.find(b => b.id === badge.id)?.unlocked || false;
             return (
               <div
                 key={badge.id}
@@ -98,7 +130,6 @@ export default function Badges() {
           })}
         </div>
 
-        {/* Levels Reference */}
         <div className={styles.sectionLabel} style={{ marginTop: 40 }}>Levels</div>
         <div className={styles.levelsTable}>
           {LEVELS.map(l => (

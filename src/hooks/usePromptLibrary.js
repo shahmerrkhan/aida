@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useXP } from '../context/XPContext';
+import { useAuth } from '../context/AuthContext';
+import {
+  loadSavedPrompts,
+  addSavedPrompt,
+  deleteSavedPrompt,
+  loadPromptHistory,
+  addPromptHistory,
+  loadPresets,
+  addPreset,
+  deletePreset,
+} from '../utils/syncService';
 
 const STORAGE_KEY = 'aida_prompt_library';
 const HISTORY_KEY = 'aida_prompt_history';
@@ -9,83 +20,109 @@ const MAX_PRESETS = 8;
 
 export function usePromptLibrary() {
   const { xp, setXP, level, setLevel } = useXP();
+  const { user } = useAuth();
   const [prompts, setPrompts] = useState([]);
   const [promptHistory, setPromptHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [presets, setPresets] = useState([]);
 
-  // Load from localStorage on mount
+  // Load from Supabase on user login, or from localStorage if no user
   useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    const loadData = async () => {
+      try {
+        const [promptsData, historyData, presetsData] = await Promise.all([
+          loadSavedPrompts(user.id),
+          loadPromptHistory(user.id),
+          loadPresets(user.id),
+        ]);
+        setPrompts(promptsData || []);
+        setPromptHistory(historyData || []);
+        setPresets(presetsData || []);
+      } catch (error) {
+        console.error('Failed to load from Supabase:', error);
+        // Fallback to localStorage if Supabase fails
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) setPrompts(JSON.parse(stored));
+          const history = localStorage.getItem(HISTORY_KEY);
+          if (history) setPromptHistory(JSON.parse(history));
+          const savedPresets = localStorage.getItem(PRESETS_KEY);
+          if (savedPresets) setPresets(JSON.parse(savedPresets));
+        } catch (e) {
+          console.error('Failed to load from localStorage:', e);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, [user]);
+
+  const addPrompt = async (promptData) => {
+    if (!user) {
+      // If not logged in, just add to local state
+      const newPrompt = {
+        id: Date.now().toString(),
+        ...promptData,
+        createdAt: new Date().toISOString(),
+        usageCount: 0,
+      };
+      setPrompts(prev => [newPrompt, ...prev]);
+      return newPrompt;
+    }
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setPrompts(JSON.parse(stored));
-      const history = localStorage.getItem(HISTORY_KEY);
-      if (history) setPromptHistory(JSON.parse(history));
-      const savedPresets = localStorage.getItem(PRESETS_KEY);
-      if (savedPresets) setPresets(JSON.parse(savedPresets));
+      await addSavedPrompt(user.id, promptData);
+      // Reload prompts from Supabase to get the real ID
+      const updated = await loadSavedPrompts(user.id);
+      setPrompts(updated);
     } catch (error) {
-      console.error('Failed to load from localStorage:', error);
+      console.error('Failed to add prompt:', error);
     }
-    setIsLoading(false);
-  }, []);
-
-  // Save prompts to localStorage
-  useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
-      } catch (error) {
-        console.error('Failed to save prompts:', error);
-      }
-    }
-  }, [prompts, isLoading]);
-
-  // Save history to localStorage
-  useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(promptHistory));
-      } catch (error) {
-        console.error('Failed to save history:', error);
-      }
-    }
-  }, [promptHistory, isLoading]);
-
-  // Save presets to localStorage
-  useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
-      } catch (error) {
-        console.error('Failed to save presets:', error);
-      }
-    }
-  }, [presets, isLoading]);
-
-  const addPrompt = (promptData) => {
-    const newPrompt = {
-      id: Date.now().toString(),
-      ...promptData,
-      createdAt: new Date().toISOString(),
-      usageCount: 0,
-    };
-    setPrompts(prev => [newPrompt, ...prev]);
-    return newPrompt;
   };
 
-  const addToHistory = (entry) => {
-    const newEntry = {
-      id: Date.now().toString(),
-      ...entry,
-      createdAt: new Date().toISOString(),
-    };
-    setPromptHistory(prev => [newEntry, ...prev].slice(0, MAX_HISTORY));
+  const addToHistory = async (entry) => {
+    if (!user) {
+      // If not logged in, just add to local state
+      const newEntry = {
+        id: Date.now().toString(),
+        ...entry,
+        createdAt: new Date().toISOString(),
+      };
+      setPromptHistory(prev => [newEntry, ...prev].slice(0, MAX_HISTORY));
+      return;
+    }
+
+    try {
+      await addPromptHistory(user.id, entry);
+      // Reload history from Supabase
+      const updated = await loadPromptHistory(user.id);
+      setPromptHistory(updated);
+    } catch (error) {
+      console.error('Failed to add to history:', error);
+    }
   };
 
-  const clearHistory = () => setPromptHistory([]);
+  const clearHistory = async () => {
+    setPromptHistory([]);
+    // Note: You'd need to add a clearPromptHistory function to syncService.js if you want to clear from Supabase too
+  };
 
-  const deletePrompt = (id) => {
+  const deletePrompt = async (id) => {
     setPrompts(prev => prev.filter(p => p.id !== id));
+    
+    if (user) {
+      try {
+        await deleteSavedPrompt(user.id, id);
+      } catch (error) {
+        console.error('Failed to delete prompt:', error);
+      }
+    }
   };
 
   const incrementUsage = (id) => {
@@ -96,17 +133,38 @@ export function usePromptLibrary() {
     );
   };
 
-  const addPreset = (preset) => {
-    const newPreset = {
-      id: Date.now().toString(),
-      ...preset,
-      createdAt: new Date().toISOString(),
-    };
-    setPresets(prev => [newPreset, ...prev].slice(0, MAX_PRESETS));
+  const addPresetFunc = async (preset) => {
+    if (!user) {
+      // If not logged in, just add to local state
+      const newPreset = {
+        id: Date.now().toString(),
+        ...preset,
+        createdAt: new Date().toISOString(),
+      };
+      setPresets(prev => [newPreset, ...prev].slice(0, MAX_PRESETS));
+      return newPreset;
+    }
+
+    try {
+      await addPreset(user.id, preset);
+      // Reload presets from Supabase
+      const updated = await loadPresets(user.id);
+      setPresets(updated);
+    } catch (error) {
+      console.error('Failed to add preset:', error);
+    }
   };
 
-  const deletePreset = (id) => {
+  const deletePresetFunc = async (id) => {
     setPresets(prev => prev.filter(p => p.id !== id));
+    
+    if (user) {
+      try {
+        await deletePreset(user.id, id);
+      } catch (error) {
+        console.error('Failed to delete preset:', error);
+      }
+    }
   };
 
   const getPromptById = (id) => prompts.find(p => p.id === id);
@@ -134,8 +192,8 @@ export function usePromptLibrary() {
     setLevel,
     addPrompt,
     addToHistory,
-    addPreset,
-    deletePreset,
+    addPreset: addPresetFunc,
+    deletePreset: deletePresetFunc,
     clearHistory,
     deletePrompt,
     incrementUsage,

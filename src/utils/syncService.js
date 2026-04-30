@@ -11,14 +11,14 @@ export async function loadUserState(userId) {
     if (error || !data) return null;
     
     return {
-      xp: data.xp,
-      level: data.level,
-      promptCount: data.prompt_count,
-      fileCount: data.file_count,
+      xp: data.xp || 0,
+      level: data.level || 0,
+      promptCount: data.prompt_count || 0,
+      fileCount: data.file_count || 0,
       platformsUsed: new Set(data.platforms_used || []),
       lastGeneratedDate: data.last_generated_date,
-      streakDays: data.streak_days,
-      badges: data.badges,
+      streakDays: data.streak_days || 0,
+      badges: data.badges && Array.isArray(data.badges) ? data.badges.map(b => ({ ...b })) : [],
     };
   } catch (e) {
     return null;
@@ -60,6 +60,7 @@ export async function loadSavedPrompts(userId) {
     subject: p.subject,
     content: p.content,
     usageCount: p.usage_count,
+    rating: p.rating || 0,
     createdAt: p.created_at,
   }));
 }
@@ -75,6 +76,7 @@ export async function addSavedPrompt(userId, prompt) {
       subject: prompt.subject,
       content: prompt.content,
       usage_count: 0,
+      rating: prompt.rating || 0,
     })
     .select()
     .single();
@@ -198,4 +200,14 @@ export async function loadUserSettings(userId) {
     toggles: data.pref_toggles || null,
     promptMode: data.pref_prompt_mode || 'detailed',
   };
+}
+
+export async function updatePromptRating(userId, promptId, rating) {
+  const { error } = await supabase
+    .from('saved_prompts')
+    .update({ rating })
+    .eq('id', promptId)
+    .eq('user_id', userId);
+  
+  if (error) console.error('Failed to update rating:', error);
 }

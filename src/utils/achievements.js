@@ -81,12 +81,18 @@ export function getState() {
   return state;
 }
 
+// NEW
 export function saveState(state) {
   const toSave = {
     ...state,
-    platformsUsed: Array.from(state.platformsUsed), // Convert Set to Array for JSON
+    platformsUsed: Array.from(state.platformsUsed),
   };
   localStorage.setItem('aida_state', JSON.stringify(toSave));
+}
+
+export async function saveStateToSupabase(userId, state) {
+  const { saveUserState } = await import('./syncService');
+  await saveUserState(userId, state);
 }
 
 export function getLevelInfo(level) {
@@ -137,8 +143,8 @@ export function getXPForNextLevel(xp) {
   return nextLevel.minXP - xp;
 }
 
-export function recordPrompt({ platform, usedNotes, vibeLevel }) {
-  const state = getState();
+  export function recordPrompt({ platform, usedNotes, vibeLevel }, injectedState) {
+    const state = injectedState || getState();
   const before = state.xp;
   let xpGained = 0;
   const newBadges = [];

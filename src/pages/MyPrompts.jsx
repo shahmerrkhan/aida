@@ -1,16 +1,19 @@
+import { useXP } from '../context/XPContext';
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './MyPrompts.module.css';
 import { usePromptLibrary } from '../hooks/usePromptLibrary';
+import { updatePromptRating } from '../utils/syncService';
+import { useAuth } from '../context/AuthContext';
 import ThemePicker from '../components/ThemePicker';
 import XPBar from '../components/XPBar';
-import { getState } from '../utils/achievements';
 import CustomSelect from "./CustomSelect";
 
 export default function MyPrompts() {
   const navigate = useNavigate();
   const { prompts, deletePrompt, incrementUsage, promptHistory, clearHistory } = usePromptLibrary();
-  const [search, setSearch] = useState('');
+  const { user } = useAuth();
+  const { xp } = useXP();  const [search, setSearch] = useState('');
   const [filterPlatform, setFilterPlatform] = useState('');
   const [copiedId, setCopiedId] = useState(null);
   const [copiedHistoryId, setCopiedHistoryId] = useState(null);
@@ -59,25 +62,23 @@ export default function MyPrompts() {
     });
   };
 
-  const [ratings, setRatings] = useState(() => {
-  try {
-    const stored = localStorage.getItem('aida_prompt_ratings');
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-    }
-  });
+  const [ratings, setRatings] = useState({});
 
   useEffect(() => {
-  try {
-    localStorage.setItem('aida_prompt_ratings', JSON.stringify(ratings));
-  } catch (error) {
-    console.error('Failed to save ratings:', error);
-  }
-  }, [ratings]);
+    if (prompts.length === 0) return;
+    
+    const ratingMap = {};
+    prompts.forEach(p => {
+      if (p.rating) ratingMap[p.id] = p.rating;
+    });
+    setRatings(ratingMap);
+  }, [prompts]);
 
-  const handleRate = (promptId, rating) => {
-  setRatings(prev => ({ ...prev, [promptId]: rating }));
+    const handleRate = (promptId, rating) => {
+    setRatings(prev => ({ ...prev, [promptId]: rating }));
+    if (user) {
+      updatePromptRating(user.id, promptId, rating);
+    }
   };
 
   return (
@@ -92,7 +93,7 @@ export default function MyPrompts() {
         ← Setup
       </button>
       <div className={styles.headerRight}>
-        <XPBar xp={getState().xp} />
+        <XPBar xp={xp} />
         <Link to="/badges" className={styles.badgesLink} title="View badges">🏅</Link>
         <ThemePicker />
       </div>
