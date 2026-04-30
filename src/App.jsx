@@ -8,6 +8,8 @@ import Result from './pages/Result';
 import Badges from './pages/Badges';
 import MyPrompts from './pages/MyPrompts';
 import Auth from './pages/Auth';
+import Templates from './pages/Templates';
+
 
 export default function App() {
   return (
@@ -28,6 +30,7 @@ export default function App() {
             <Route path="/badges" element={<Badges />} />
             <Route path="/my-prompts" element={<MyPrompts />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/templates" element={<Templates />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

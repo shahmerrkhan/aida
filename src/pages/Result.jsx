@@ -1,3 +1,4 @@
+import PromptRating from '../components/PromptRating';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import ThemePicker from '../components/ThemePicker';
@@ -219,6 +220,7 @@ function handleShareTwitter() {
             <p className={styles.tipText}>{PLATFORM_TIPS[platform]}</p>
           </div>
         )}
+        <PromptRating promptId={location.state?.savedPromptId} />
         <div className={styles.actions}>
   <button
     className={`${styles.copyBtn} ${copied ? styles.copied : ''}`}

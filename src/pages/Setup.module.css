@@ -210,6 +210,8 @@
   font-size: 0.95rem;
   color: var(--text-primary);
   transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input:focus {
@@ -705,4 +707,29 @@ select {
 .confirmBtnSecondary:hover {
   border-color: var(--text-muted);
   color: var(--text-primary);
+}
+
+.templatesLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--highlight-soft);
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.templatesLink:hover {
+  background: var(--accent);
+  color: var(--accent-text);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--shadow);
 }

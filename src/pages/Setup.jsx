@@ -1,3 +1,4 @@
+import WeeklyRecap from '../components/WeeklyRecap';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
@@ -26,6 +27,16 @@ const PLATFORMS = [
   { id: 'meta', label: 'Meta AI', sub: 'Meta' },
   { id: 'deepseek', label: 'DeepSeek', sub: 'DeepSeek' },
   { id: 'poe', label: 'Poe', sub: 'Anthropic' },
+];
+
+const SUBJECT_LIST = [
+  'Biology', 'Chemistry', 'Physics', 'Environmental Science',
+  'Calculus', 'Algebra', 'Geometry', 'Statistics', 'Mathematics',
+  'English', 'English Literature', 'English Language Arts',
+  'History', 'World History', 'Canadian History', 'Geography',
+  'Computer Science', 'Economics', 'Psychology', 'Sociology',
+  'French', 'Spanish', 'Philosophy', 'Visual Arts', 'Music',
+  'Physical Education', 'Law', 'Politics', 'Accounting', 'Business',
 ];
 
 const TASKS = [
@@ -76,14 +87,22 @@ export default function Setup() {
     const seen = localStorage.getItem('aida_onboarding_seen');
     return !seen;
   });
+  const [subjectSuggestions, setSubjectSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
-    if (location.state?.preset) {
-      setPlatform(location.state.preset.platform);
-      setTask(location.state.preset.taskType);
-      setSubject(location.state.preset.subject);
-    }
-  }, [location.state?.preset]);
+  if (location.state?.preset) {
+    const p = location.state.preset;
+    setPlatform(p.platform);
+    setTask(p.taskType);
+    setSubject(p.subject);
+    if (p.topic !== undefined) setTopic(p.topic);
+    if (p.vibeLevel !== undefined) setVibeLevel(p.vibeLevel);
+    if (p.promptMode) setPromptMode(p.promptMode);
+    if (p.toggles) setToggles(p.toggles);
+    if (p.customInstructions) setCustomInstructions(p.customInstructions);
+  }
+}, [location.state?.preset]);
 
   useEffect(() => {
   if (!user) return;
@@ -280,6 +299,10 @@ export default function Setup() {
         <h1 className={styles.title}>Set up your AI</h1>
         <p className={styles.subtitle}>Pick your platform, task, and subject. Aida handles the rest.</p>
 
+        <Link to="/templates" className={styles.templatesLink}>⚡ Browse templates</Link>
+
+        <WeeklyRecap />
+
         {presets.length > 0 && (
           <section className={styles.section} style={{ textAlign: 'center' }}>
             <label className={styles.sectionLabel} style={{ textAlign: 'center' }}>⚡ Quick Presets</label>
@@ -354,12 +377,75 @@ export default function Setup() {
           <div className={styles.inputRow}>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Subject *</label>
-              <input
-                className={styles.input}
-                placeholder="e.g. Biology, Calculus, History"
-                value={subject}
-                onChange={e => setSubject(e.target.value)}
-              />
+                <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  className={styles.input}
+                  style={{ width: '100%' }}
+                  placeholder="e.g. Biology, Calculus, History"
+                  value={subject}
+                  onChange={e => {
+                    setSubject(e.target.value);
+                    const val = e.target.value.trim().toLowerCase();
+                    if (val.length < 1) {
+                      setSubjectSuggestions([]);
+                      setShowSuggestions(false);
+                      return;
+                    }
+                    const matches = SUBJECT_LIST.filter(s =>
+                      s.toLowerCase().startsWith(val)
+                    ).slice(0, 5);
+                    setSubjectSuggestions(matches);
+                    setShowSuggestions(matches.length > 0);
+                  }}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  onFocus={() => {
+                    if (subjectSuggestions.length > 0) setShowSuggestions(true);
+                  }}
+                />
+                {showSuggestions && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: 'var(--bg-card)',
+                    border: '1.5px solid var(--border)',
+                    borderRadius: '10px',
+                    marginTop: '4px',
+                    zIndex: 100,
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 24px var(--shadow)',
+                  }}>
+                    {subjectSuggestions.map(s => (
+                      <button
+                        key={s}
+                        onMouseDown={() => {
+                          setSubject(s);
+                          setShowSuggestions(false);
+                        }}
+                        style={{
+                          display: 'block',
+                          width: '100%',
+                          padding: '10px 16px',
+                          background: 'none',
+                          border: 'none',
+                          borderBottom: '1px solid var(--border-soft)',
+                          textAlign: 'left',
+                          fontSize: '0.9rem',
+                          color: 'var(--text-primary)',
+                          cursor: 'pointer',
+                          fontFamily: 'DM Sans, sans-serif',
+                          transition: 'background 0.15s',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Topic (optional)</label>
